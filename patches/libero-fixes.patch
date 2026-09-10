@@ -1,0 +1,33 @@
+diff --git a/libero/libero/benchmark/__init__.py b/libero/libero/benchmark/__init__.py
+index 2b833d0..5734edb 100644
+--- a/libero/libero/benchmark/__init__.py
++++ b/libero/libero/benchmark/__init__.py
+@@ -161,7 +161,7 @@ class Benchmark(abc.ABC):
+             self.tasks[i].problem_folder,
+             self.tasks[i].init_states_file,
+         )
+-        init_states = torch.load(init_states_path)
++        init_states = torch.load(init_states_path, weights_only=False)
+         return init_states
+ 
+     def set_task_embs(self, task_embs):
+diff --git a/scripts/collect_demonstration.py b/scripts/collect_demonstration.py
+index c1ae83d..b165138 100644
+--- a/scripts/collect_demonstration.py
++++ b/scripts/collect_demonstration.py
+@@ -312,9 +312,12 @@ if __name__ == "__main__":
+         device = Keyboard(
+             pos_sensitivity=args.pos_sensitivity, rot_sensitivity=args.rot_sensitivity
+         )
+-        env.viewer.add_keypress_callback("any", device.on_press)
+-        env.viewer.add_keyup_callback("any", device.on_release)
+-        env.viewer.add_keyrepeat_callback("any", device.on_press)
++        # 참고: Keyboard 는 생성 시 pynput 전역 리스너를 스스로 시작한다.
++        # 현재 robosuite 의 OpenCVRenderer 에는 keyup/keyrepeat 콜백이 없으므로
++        # 예전 코드에 있던 viewer 콜백 등록 3줄은 제거했다.
++        # macOS 에서는 시스템 설정 > 개인정보 보호 및 보안 > 손쉬운 사용 에
++        # 터미널 앱을 추가해야 키 입력이 잡힌다.
++
+     elif args.device == "spacemouse":
+         from robosuite.devices import SpaceMouse
+ 
