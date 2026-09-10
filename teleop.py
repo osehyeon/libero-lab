@@ -18,6 +18,7 @@ import argparse
 import numpy as np
 import robosuite
 from robosuite.utils.input_utils import input2action
+from robosuite.wrappers import VisualizationWrapper
 
 from libero.libero import benchmark, get_libero_path
 from libero.libero.envs import TASK_MAPPING
@@ -54,6 +55,8 @@ def main():
         ignore_done=True,
         control_freq=20,
     )
+    raw = env                       # keep the unwrapped env for sim / success checks
+    env = VisualizationWrapper(env)  # draws gripper site markers
 
     if args.device == "keyboard":
         from robosuite.devices import Keyboard
@@ -70,19 +73,19 @@ def main():
 
     while True:
         env.reset()
-        env.sim.set_state_from_flattened(inits[args.init])
-        env.sim.forward()
+        raw.sim.set_state_from_flattened(inits[args.init])
+        raw.sim.forward()
         env.render()
         device.start_control()
 
         solved = False
         while True:
-            action, _ = input2action(device=device, robot=env.robots[0])
+            action, _ = input2action(device=device, robot=raw.robots[0])
             if action is None:      # q pressed
                 break
             env.step(action)
             env.render()
-            if not solved and env._check_success():
+            if not solved and raw._check_success():
                 print("solved")
                 solved = True
 
