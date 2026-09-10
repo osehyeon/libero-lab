@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """Drive a LIBERO task by hand. Nothing is recorded.
 
-  python teleop.py                                  # libero_spatial task 0
-  python teleop.py --suite libero_goal --task 3
+  python teleop.py                                  # push the plate -- easiest task
+  python teleop.py --suite libero_goal --task 7     # turn on the stove
+  python teleop.py --suite libero_spatial --task 0  # pick and place, much harder
   python teleop.py --device spacemouse
 
 Keys (keyboard device):
@@ -27,10 +28,10 @@ from libero.libero.envs import bddl_utils as BDDLUtils
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--suite", default="libero_spatial",
+    p.add_argument("--suite", default="libero_goal",
                    choices=["libero_spatial", "libero_object", "libero_goal",
                             "libero_90", "libero_10"])
-    p.add_argument("--task", type=int, default=0)
+    p.add_argument("--task", type=int, default=5)
     p.add_argument("--init", type=int, default=0, help="which of the 50 initial states")
     p.add_argument("--device", default="keyboard", choices=["keyboard", "spacemouse"])
     p.add_argument("--camera", default="frontview")

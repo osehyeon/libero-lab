@@ -32,9 +32,14 @@ cd libero-lab && ./setup.sh
 Control a task by hand. Nothing is recorded.
 
 ```bash
-.venv/bin/python teleop.py
-.venv/bin/python teleop.py --suite libero_goal --task 3
+.venv/bin/python teleop.py                                   # push the plate to the front of the stove
+.venv/bin/python teleop.py --suite libero_goal --task 7      # turn on the stove
+.venv/bin/python teleop.py --suite libero_spatial --task 0   # pick and place
 ```
+
+The default is the easiest task in the benchmark: slide the plate with `w a s d`,
+no grasping, no rotation. Pick-and-place tasks are far harder by keyboard -- `space` toggles the gripper
+and the fingers need about 100 steps to close, so press it once and wait a few seconds.
 
 | Key | |
 |---|---|
