@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""LIBERO 데모 실행기.
+"""LIBERO task runner.
 
-예시:
-  python run_demo.py --list                       # 태스크 목록
+Examples:
+  python run_demo.py --list                       # list tasks
   python run_demo.py --suite libero_spatial --task 0 --gui
   python run_demo.py --suite libero_object --task 3 --video out.mp4
 """
@@ -15,9 +15,9 @@ def main():
                             "libero_90", "libero_10"])
     p.add_argument("--task", type=int, default=0)
     p.add_argument("--steps", type=int, default=200)
-    p.add_argument("--gui", action="store_true", help="MuJoCo 창 띄우기")
-    p.add_argument("--video", default=None, help="mp4로 저장할 경로")
-    p.add_argument("--list", action="store_true", help="태스크 목록만 출력")
+    p.add_argument("--gui", action="store_true", help="open a MuJoCo window")
+    p.add_argument("--video", default=None, help="path to save an mp4")
+    p.add_argument("--list", action="store_true", help="only print the task list")
     args = p.parse_args()
 
     from libero.libero import benchmark, get_libero_path
@@ -47,7 +47,7 @@ def main():
 
     frames = []
     for _ in range(args.steps):
-        # 여기에 정책(policy)이 들어갑니다. 지금은 무작위 행동.
+        # A policy goes here. For now, random actions.
         action = np.random.uniform(-0.3, 0.3, 7)
         obs, reward, done, info = env.step(action)
         if args.gui:
@@ -55,13 +55,13 @@ def main():
         elif args.video:
             frames.append(obs["agentview_image"][::-1])
         if done:
-            print("태스크 성공!")
+            print("Task solved")
             break
 
     if args.video and frames:
         import imageio
         imageio.mimsave(args.video, frames, fps=20)
-        print(f"저장됨: {args.video}")
+        print(f"saved: {args.video}")
     env.close()
 
 if __name__ == "__main__":
