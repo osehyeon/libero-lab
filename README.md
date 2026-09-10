@@ -22,9 +22,32 @@ cd libero-lab && ./setup.sh
 | `setup.sh` | Environment setup, including 8 upstream workarounds |
 | `patches/` | Source fixes for LIBERO — a submodule cannot carry local edits |
 | `run_demo.py` | List tasks, run with GUI, save video |
+| `teleop.py` | Drive a task by hand, nothing recorded |
 | `replay_demo.py` | Replay human demos (needs the dataset) |
 | `docs/` | HTML write-ups on task structure, MuJoCo I/O, rotations, VLA practice |
 | `CLAUDE.md` | Working notes — bug list, measured facts, next steps |
+
+## Drive it yourself
+
+Control a task by hand. Nothing is recorded.
+
+```bash
+.venv/bin/python teleop.py
+.venv/bin/python teleop.py --suite libero_goal --task 3
+```
+
+| Key | |
+|---|---|
+| `w` `a` `s` `d` | move in the xy plane |
+| `r` `f` | move up and down |
+| `z` `x` / `t` `g` / `c` `v` | rotate about x / y / z |
+| `space` | toggle gripper |
+| `q` | reset the task |
+
+Add `--device spacemouse` for a 3D mouse (`pip install hidapi` first).
+
+On macOS, add your terminal under **System Settings → Privacy & Security →
+Accessibility**, then restart it. Without this the window opens but keys do nothing.
 
 ## Collect your own demos
 
@@ -38,23 +61,12 @@ cd LIBERO
     --bddl-file libero/libero/bddl_files/libero_spatial/pick_up_the_black_bowl_between_the_plate_and_the_ramekin_and_place_it_on_the_plate.bddl
 ```
 
-| Key | |
-|---|---|
-| `w` `a` `s` `d` | move in the xy plane |
-| `r` `f` | move up and down |
-| `z` `x` / `t` `g` / `c` `v` | rotate about x / y / z |
-| `space` | toggle gripper |
-| `q` | end this episode, start the next |
-
+Same keys, but `q` ends the episode and starts the next one.
 `--robots Panda` is required — omitting it hits an upstream argparse bug.
-Use `--device spacemouse` for a 3D mouse (`pip install hidapi` first).
 
 Episodes land in `demonstration_data/` as states and actions, without images.
 `scripts/create_dataset.py` replays them to render the observations and write the
 final hdf5.
-
-On macOS, add your terminal under **System Settings → Privacy & Security →
-Accessibility**, then restart it. Without this the window opens but keys do nothing.
 
 ## Datasets
 
