@@ -1,0 +1,299 @@
+<title>쿼터니언과 각속도</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --ground:#f2f4f5; --panel:#ffffff; --panel-2:#e9edef;
+  --ink:#151c22; --ink-2:#3f4b54; --ink-3:#6b7880;
+  --rule:#d2dade; --rule-2:#bcc7cd;
+  --accent:#0d6b6d; --accent-soft:#d8ebea;
+  --ochre:#9a5b12; --ochre-soft:#f3e6d3;
+  --pos:#1c5f8a; --pos-soft:#d9e8f2;
+  --shadow:0 1px 2px rgba(21,28,34,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#101619; --panel:#171f24; --panel-2:#1e282e;
+    --ink:#e7eef1; --ink-2:#b0bfc7; --ink-3:#7e8f99;
+    --rule:#2a363d; --rule-2:#3a4952;
+    --accent:#5cc7c2; --accent-soft:#16332f;
+    --ochre:#d99b4e; --ochre-soft:#33260f;
+    --pos:#6fb5df; --pos-soft:#14293a;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101619; --panel:#171f24; --panel-2:#1e282e;
+  --ink:#e7eef1; --ink-2:#b0bfc7; --ink-3:#7e8f99;
+  --rule:#2a363d; --rule-2:#3a4952;
+  --accent:#5cc7c2; --accent-soft:#16332f;
+  --ochre:#d99b4e; --ochre-soft:#33260f;
+  --pos:#6fb5df; --pos-soft:#14293a;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
+  font-size:16.5px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:54px 28px 92px}
+.col{max-width:690px}
+h1,h2,h3{font-family:Archivo,"Helvetica Neue",Arial,sans-serif;text-wrap:balance}
+h1{font-size:2.45rem;line-height:1.1;letter-spacing:-.022em;font-weight:700;margin:0 0 14px}
+h2{font-size:1.42rem;line-height:1.2;letter-spacing:-.014em;font-weight:600;margin:0}
+p{margin:0 0 16px}
+.mono,code,pre{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace}
+code{font-size:.86em;background:var(--panel-2);padding:.12em .38em;border-radius:3px;color:var(--ink)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+.lede{font-size:1.14rem;color:var(--ink-2);margin:0 0 8px}
+header{border-bottom:1px solid var(--rule);padding-bottom:30px}
+section{padding-top:44px}
+.sechead{display:flex;align-items:baseline;gap:14px;margin-bottom:20px}
+.sechead .num{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--accent);
+  border:1px solid var(--rule-2);border-radius:3px;padding:2px 7px;flex:none}
+
+pre{background:var(--panel);border:1px solid var(--rule);border-left:2px solid var(--accent);
+  padding:18px 20px;overflow-x:auto;font-size:.82rem;line-height:1.7;
+  margin:0 0 18px;border-radius:0 4px 4px 0}
+pre .c{color:var(--ink-3)}
+pre .k{color:var(--accent)}
+pre .o{color:var(--ochre)}
+pre .b{color:var(--pos)}
+
+/* 슬롯 도해 */
+.slots{display:grid;gap:10px;margin:0 0 8px}
+.slotrow{border:1px solid var(--rule);border-radius:5px;background:var(--panel);
+  padding:14px 16px;box-shadow:var(--shadow)}
+.slotrow .hd{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;margin-bottom:10px}
+.slotrow .nm{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:.95rem}
+.slotrow .sz{font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--ink-3)}
+.cells{display:flex;flex-wrap:wrap;gap:6px}
+.cell{font-family:"IBM Plex Mono",monospace;font-size:.78rem;padding:7px 12px;
+  border-radius:4px;border:1px solid var(--rule);background:var(--panel-2);color:var(--ink-2)}
+.cell.p{background:var(--pos-soft);border-color:transparent;color:var(--pos);font-weight:500}
+.cell.r{background:var(--accent-soft);border-color:transparent;color:var(--accent);font-weight:500}
+.cell.x{background:var(--ochre-soft);border-color:transparent;color:var(--ochre);font-weight:500}
+
+.tablewrap{overflow-x:auto;margin:0 0 20px;border:1px solid var(--rule);
+  border-radius:4px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--rule);white-space:nowrap}
+thead th{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500;background:var(--panel-2)}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+td.desc{white-space:normal}
+.note{border-left:2px solid var(--ochre);background:var(--ochre-soft);
+  padding:16px 20px;margin:0 0 20px;border-radius:0 4px 4px 0;font-size:.97rem;line-height:1.7}
+.note b.lbl{font-family:Archivo,sans-serif;font-size:.82rem;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ochre);display:block;margin-bottom:5px}
+.key{background:var(--accent-soft);padding:.08em .3em;border-radius:2px}
+.eq{font-family:"IBM Plex Mono",monospace;text-align:center;font-size:1.02rem;
+  padding:18px;border:1px solid var(--rule);border-radius:5px;background:var(--panel);
+  margin:0 0 20px;box-shadow:var(--shadow);overflow-x:auto}
+.eq b{color:var(--accent)}
+footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);
+  font-size:.82rem;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">MuJoCo 상태 표현 · LIBERO 씬 실측</p>
+  <h1>쿼터니언과 각속도</h1>
+  <p class="lede col">물체 하나의 위치는 <b>7칸</b>인데 속도는 <b>6칸</b>이다. 이 한 칸 차이에 회전을 숫자로 적는 문제 전체가 들어 있다.</p>
+</header>
+
+<section>
+  <div class="sechead"><span class="num">01</span><h2>7칸과 6칸</h2></div>
+  <div class="col">
+    <p>MuJoCo에서 자유롭게 움직이는 물체 하나가 차지하는 슬롯이다. LIBERO 씬의 검은 그릇에서 그대로 읽은 값이다.</p>
+  </div>
+
+  <div class="slots">
+    <div class="slotrow">
+      <div class="hd"><span class="nm">qpos</span><span class="sz">7칸 · 위치</span></div>
+      <div class="cells">
+        <span class="cell p">x −0.063</span><span class="cell p">y 0.202</span><span class="cell p">z 0.970</span>
+        <span class="cell r">qw 0.707</span><span class="cell r">qx 0.000</span><span class="cell r">qy 0.000</span><span class="cell r">qz 0.707</span>
+      </div>
+    </div>
+    <div class="slotrow">
+      <div class="hd"><span class="nm">qvel</span><span class="sz">6칸 · 속도</span></div>
+      <div class="cells">
+        <span class="cell p">vx</span><span class="cell p">vy</span><span class="cell p">vz</span>
+        <span class="cell r">ωx</span><span class="cell r">ωy</span><span class="cell r">ωz</span>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <p style="margin-top:14px">위치 3칸은 양쪽이 같다. <b>차이는 회전에서 난다</b> — 자세는 4칸, 각속도는 3칸이다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">02</span><h2>자세: 4개를 쓰되 자유도는 3</h2></div>
+  <div class="col">
+    <p>3차원 회전의 자유도는 분명히 3이다. 그런데 쿼터니언은 숫자를 4개 쓴다. 남는 하나를 없애는 것이 <b>길이 제약</b>이다.</p>
+  </div>
+  <div class="eq">|q| = √(qw² + qx² + qy² + qz²) = <b>1</b> &nbsp;&nbsp;→&nbsp;&nbsp; 4 − 1 = <b>3</b></div>
+  <div class="col">
+    <p>시뮬레이션을 돌리는 내내 이 값은 정확히 1을 유지한다. 물리를 15스텝(0.03초) 진행시키며 찍어본 결과다.</p>
+  </div>
+<pre><span class="c"># 그릇에 z축 4 rad/s 각속도를 주고 관찰</span>
+t=0.000  q=[<span class="k">0.70711  0.00000  0.00000  0.70711</span>]  |q|=<span class="o">1.000000</span>  ω=[0, 0, 4.000]
+t=0.010  q=[<span class="k">0.69658 -0.00002 -0.00003  0.71747</span>]  |q|=<span class="o">1.000000</span>  ω=[0, 0, 2.371]
+t=0.020  q=[<span class="k">0.69028 -0.00006 -0.00008  0.72355</span>]  |q|=<span class="o">1.000000</span>  ω=[0, 0, 1.405]
+t=0.030  q=[<span class="k">0.68651 -0.00009 -0.00012  0.72712</span>]  |q|=<span class="o">1.000000</span>  ω=[0, 0, 0.833]
+                                                        <span class="c">└ 마찰로 감속</span></pre>
+  <div class="col">
+    <p>네 숫자가 제각기 변하지만 <b>길이는 흔들림 없이 1</b>이다. 그래서 4칸을 쓰고도 실제로 표현하는 것은 3자유도이고, 속도 쪽 3칸과 정확히 맞아떨어진다.</p>
+    <p>초기값 <code>[0.707, 0, 0, 0.707]</code>은 <b>z축 기준 90° 회전</b>이다. 쿼터니언은 <code>[cos(θ/2), sin(θ/2)·축]</code> 꼴이라, <code>cos45° = sin45° = 0.707</code>이 그 뜻이다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">03</span><h2>속도: 제약 없는 벡터 3개</h2></div>
+  <div class="col">
+    <p>각속도 <code>ω</code>는 그냥 3차원 벡터다. 방향은 <b>회전축</b>, 길이는 <b>초당 회전 각도(rad/s)</b>다. 오른손 법칙을 따른다.</p>
+    <p>여기에는 길이 제약이 없다. 크기가 얼마든, 방향이 어디든 유효한 각속도다. 그래서 3칸이면 충분하고 남지도 모자라지도 않는다. 위와 같은 <span class="key">3 = 3</span> 이지만, 자세 쪽은 <b>4칸에 제약 1개</b>로 3을 만들고 속도 쪽은 <b>3칸을 그대로</b> 쓴다.</p>
+  </div>
+
+  <div class="col" style="margin-top:26px">
+    <h3 style="font-family:Archivo,sans-serif;font-size:1.08rem;margin:0 0 10px">그런데 어느 좌표계인가</h3>
+    <p>여기에 함정이 하나 있다. <b>같은 6칸 안에서 앞뒤의 기준 좌표계가 다르다.</b></p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>필드</th><th class="num">칸</th><th>기준 좌표계</th><th class="desc">내용</th></tr></thead>
+      <tbody>
+        <tr><td><code>qvel[0:3]</code></td><td class="num">3</td><td><b>월드</b></td><td class="desc">선속도 (m/s)</td></tr>
+        <tr><td><code>qvel[3:6]</code></td><td class="num">3</td><td><b style="color:var(--ochre)">물체</b></td><td class="desc">각속도 (rad/s) — 물체에 붙어 함께 도는 축 기준</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p>실험으로 확인할 수 있다. 그릇을 z축으로 90° 돌려두면 물체의 x축이 월드 +y를 가리킨다. 그 상태에서 각속도의 x 성분에만 1을 넣으면:</p>
+  </div>
+<pre>qvel[3:6] = [1, 0, 0]          <span class="c"># 물체 기준 x축 회전</span>
+월드에서 측정한 각속도 = [<span class="o">0, 1, 0</span>]   <span class="c"># 실제로는 월드 y축으로 돈다</span>
+
+<span class="c"># 관계식이 정확히 성립한다</span>
+&#969;_world = q &#8855; &#969;_body &#8855; q*
+
+  qvel_ang              월드 측정          q&#183;&#969;&#183;q*         차이
+  [1,  0,   0]          [ 0, 1, 0]        [ 0, 1, 0]      <span class="k">0</span>
+  [0,  1,   0]          [-1, 0, 0]        [-1, 0, 0]      <span class="k">0</span>
+  [0.3,-0.5, 0.8]       [0.5,0.3,0.8]     [0.5,0.3,0.8]   <span class="k">1.1e-16</span></pre>
+
+  <div class="col">
+    <p><b>이유는 관성 텐서에 있다.</b> 회전 운동 방정식에는 관성이 들어가는데, 관성은 방향에 따라 값이 다르다. 물체가 돌면 월드 기준 관성 텐서도 매 스텝 함께 회전해 다시 계산해야 한다. 반면 <b>물체 좌표계에서는 관성이 상수</b>다 — 물체와 함께 돌기 때문이다.</p>
+    <p>모델에 저장된 형태가 이를 그대로 보여준다.</p>
+  </div>
+<pre>m.body_inertia.shape = (38, <span class="k">3</span>)     <span class="c"># 3&#215;3 행렬이 아니라 값 3개 (주축 기준 대각)</span>
+m.body_iquat.shape   = (38, 4)     <span class="c"># 그 주축이 어느 방향인지</span>
+m.body_mass.shape    = (38,)       <span class="c"># 질량은 스칼라 하나</span>
+
+akita_black_bowl_1_main
+  질량  0.00559 kg                        <span class="c"># 방향과 무관</span>
+  관성  [0.000009, 0.000006, 0.000006]    <span class="c"># 방향마다 다름</span></pre>
+
+  <div class="col">
+    <p><b>질량은 스칼라 하나, 관성은 값 3개 + 주축 방향.</b> 이 비대칭이 좌표계 선택의 비대칭을 그대로 낳는다. 질량은 어느 좌표계로 보든 같으니 선속도는 다루기 편한 월드를 쓰고, 관성은 방향을 타니 각속도는 관성이 상수가 되는 물체 좌표계를 쓴다.</p>
+  </div>
+
+  <div class="note col">
+    <b class="lbl">테스트에서 놓치기 쉽다</b>
+    물체가 회전하지 않은 상태(<code>q = [1,0,0,0]</code>)에서는 두 좌표계가 일치해서 <b>차이가 드러나지 않는다.</b> 초기 상태만 확인하고 넘어가면 모른 채 지나가고, 물체가 기울어진 뒤에야 축이 어긋난다. 월드 기준 각속도가 필요하면 <code>mj_objectVelocity(..., flg_local=0)</code>을 쓰거나 직접 <code>q &#8855; &#969; &#8855; q*</code>로 변환한다.
+  </div>
+
+  <div class="note col">
+    <b class="lbl">그래서 더하기로 적분할 수 없다</b>
+    속도가 있으면 보통 <code>다음 = 현재 + 속도 × dt</code>로 적분한다. 위치에는 통하지만 <b>자세에는 통하지 않는다.</b> 쿼터니언에 각속도를 그냥 더하면 길이 제약이 깨져 회전이 아닌 것이 되어버린다.
+  </div>
+<pre>q  = [0.70711, 0, 0, 0.70711]   ω = [0, 0, 4.0]   dt = 0.05
+
+<span class="c"># 순진하게 더하면</span>
+q + dt·[0, ω] = [0.70711, 0, 0, <span class="o">0.90711</span>]   |q| = <span class="o">1.15015</span>  <span class="c">← 1이 아니다</span>
+
+<span class="c"># MuJoCo의 올바른 적분</span>
+mju_quatIntegrate(q, ω, dt) = [<span class="k">0.63298</span>, 0, 0, <span class="k">0.77417</span>]   |q| = <span class="k">1.00000000</span></pre>
+  <div class="col">
+    <p>값 자체도 다르다. 회전은 곱셈으로 합성되는 대상이라, 더하기가 아니라 <b>구면 위를 미끄러지는</b> 연산이어야 한다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">04</span><h2>왜 오일러각 3개를 쓰지 않는가</h2></div>
+  <div class="col">
+    <p>자유도가 3이면 숫자 3개(yaw, pitch, roll)로 적으면 될 것 같다. 실제로 사람에게는 그쪽이 읽기 쉽다. 쓰지 않는 이유는 <b>짐벌락(gimbal lock)</b> 때문이다.</p>
+  </div>
+<pre><span class="c"># pitch 를 90°로 세우면</span>
+R(yaw= <span class="b">30°</span>, pitch=90°, roll=  <span class="b">0°</span>)
+R(yaw=  <span class="b">0°</span>, pitch=90°, roll=<span class="b">−30°</span>)      두 행렬의 최대 차이 = <span class="o">3.06e-17</span>
+                                    <span class="c">└ 완전히 같은 회전</span>
+
+<span class="c"># pitch 가 89°면</span>
+같은 비교                            최대 차이 = <span class="k">0.0087</span>   <span class="c">← 다른 회전</span></pre>
+  <div class="col">
+    <p><code>pitch = 90°</code>에서 <b>yaw와 roll이 같은 축을 돌게 되어</b> 구분이 사라진다. 서로 다른 두 조합이 같은 자세를 가리키고, 반대로 그 자세를 오일러각으로 되돌리면 답이 하나로 정해지지 않는다. 자유도 하나가 소멸하는 것이다.</p>
+    <p>수치적으로 더 나쁜 것은 그 <b>근처</b>다. 89.9°처럼 아슬아슬한 지점에서는 자세가 조금만 변해도 yaw와 roll이 크게 튄다. 정책이 이런 값을 출력하거나 학습해야 한다면 불연속이 그대로 학습을 방해한다.</p>
+    <p>쿼터니언에는 이런 지점이 없다. 모든 회전이 매끄럽게 이어진다 — 숫자를 하나 더 쓰는 대가로 얻는 것이 이것이다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">05</span><h2>행동의 회전은 왜 3개인가</h2></div>
+  <div class="col">
+    <p>여기서 헷갈리기 쉬운 지점이 있다. 상태의 자세는 쿼터니언 4개인데, 정책이 내는 <b>행동</b>의 회전은 <code>droll, dpitch, dyaw</code> 3개다. 표현이 다르다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>쓰임</th><th class="num">칸</th><th>표현</th><th class="desc">이유</th></tr></thead>
+      <tbody>
+        <tr><td>상태의 자세</td><td class="num">4</td><td>쿼터니언</td><td class="desc">임의의 회전을 특이점 없이 저장해야 한다</td></tr>
+        <tr><td>행동의 회전</td><td class="num">3</td><td>축-각도 (axis-angle)</td><td class="desc">한 스텝의 <b>작은 변화량</b>이라 특이점에 닿지 않는다</td></tr>
+        <tr><td>각속도</td><td class="num">3</td><td>축-각도 / 초</td><td class="desc">축-각도를 시간으로 나눈 것과 같은 꼴</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p><b>축-각도는 회전축 방향의 벡터이고 그 길이가 회전각이다.</b> 각속도와 같은 형태이며, 실제로 서로 자유롭게 바꿀 수 있다.</p>
+  </div>
+<pre><span class="c"># 쿼터니언 → 축-각도</span>
+q = [0.70711, -0.00003, 0, 0.70711]
+mju_quat2Vel(q) = [-0.00006, 0.00001, <span class="k">1.5708</span>]
+                   회전각 = |v| = 1.571 rad = <span class="k">90.0°</span>,  축 = z
+
+<span class="c"># 다시 쿼터니언으로 되돌리면</span>
+mju_axisAngle2Quat(축, 각) = [0.70711, -0.00003, 0, 0.70711]
+                             원본과의 최대 오차 <span class="k">4.5e-13</span></pre>
+  <div class="col">
+    <p>왕복해도 오차가 <code>1e-13</code> 수준이다. 두 표현은 같은 것을 다르게 적었을 뿐이다. 행동에 3개짜리를 쓰는 이유는 단지 <b>한 스텝의 변화량이 작아서</b>다 — <code>[−0.5, 0.5] rad</code> 범위에서는 짐벌락이 생길 여지가 없다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">06</span><h2>직접 읽기</h2></div>
+<pre>QA, VA = 9, 9          <span class="c"># akita_black_bowl_1 의 qpos / qvel 시작 주소</span>
+
+pos  = d.qpos[QA   : QA+3]      <span class="c"># xyz            (m)</span>
+quat = d.qpos[QA+3 : QA+7]      <span class="c"># qw qx qy qz    |q| = 1</span>
+lin  = d.qvel[VA   : VA+3]      <span class="c"># 선속도          (m/s)</span>
+ang  = d.qvel[VA+3 : VA+6]      <span class="c"># 각속도 ω       (rad/s)</span>
+
+<span class="c"># 주소는 하드코딩하지 말고 모델에서 읽는다</span>
+jid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, <span class="o">"akita_black_bowl_1_joint0"</span>)
+QA, VA = m.jnt_qposadr[jid], m.jnt_dofadr[jid]</pre>
+  <div class="col">
+    <p>슬롯 주소를 상수로 박아두면 씬이 바뀔 때 조용히 엉뚱한 물체를 읽는다. <code>jnt_qposadr</code>와 <code>jnt_dofadr</code>로 조회하는 편이 안전하다.</p>
+  </div>
+</section>
+
+<footer>
+  MuJoCo 2.3.7 · 모든 수치는 libero_spatial 태스크 0 씬을 실제로 적재해 측정
+</footer>
+
+</div>

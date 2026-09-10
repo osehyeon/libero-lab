@@ -1,0 +1,420 @@
+<title>MuJoCo 입출력 해부</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --ground:#f2f4f5; --panel:#ffffff; --panel-2:#e9edef;
+  --ink:#151c22; --ink-2:#3f4b54; --ink-3:#6b7880;
+  --rule:#d2dade; --rule-2:#bcc7cd;
+  --accent:#0d6b6d; --accent-soft:#d8ebea;
+  --ochre:#9a5b12; --ochre-soft:#f3e6d3;
+  --in:#1c5f8a; --in-soft:#d9e8f2;
+  --shadow:0 1px 2px rgba(21,28,34,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#101619; --panel:#171f24; --panel-2:#1e282e;
+    --ink:#e7eef1; --ink-2:#b0bfc7; --ink-3:#7e8f99;
+    --rule:#2a363d; --rule-2:#3a4952;
+    --accent:#5cc7c2; --accent-soft:#16332f;
+    --ochre:#d99b4e; --ochre-soft:#33260f;
+    --in:#6fb5df; --in-soft:#14293a;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101619; --panel:#171f24; --panel-2:#1e282e;
+  --ink:#e7eef1; --ink-2:#b0bfc7; --ink-3:#7e8f99;
+  --rule:#2a363d; --rule-2:#3a4952;
+  --accent:#5cc7c2; --accent-soft:#16332f;
+  --ochre:#d99b4e; --ochre-soft:#33260f;
+  --in:#6fb5df; --in-soft:#14293a;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
+  font-size:16.5px; line-height:1.75; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:56px 28px 96px}
+.col{max-width:690px}
+h1,h2,h3{font-family:Archivo,"Helvetica Neue",Arial,sans-serif;text-wrap:balance}
+h1{font-size:2.5rem;line-height:1.1;letter-spacing:-.022em;font-weight:700;margin:0 0 14px}
+h2{font-size:1.45rem;line-height:1.2;letter-spacing:-.014em;font-weight:600;margin:0}
+p{margin:0 0 16px}
+.mono,code,pre{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace}
+code{font-size:.86em;background:var(--panel-2);padding:.12em .38em;border-radius:3px;color:var(--ink)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+.lede{font-size:1.14rem;color:var(--ink-2);margin:0 0 8px}
+header{border-bottom:1px solid var(--rule);padding-bottom:32px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:20px;
+  font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--ink-3)}
+.meta b{color:var(--ink-2);font-weight:500}
+section{padding-top:46px}
+.sechead{display:flex;align-items:baseline;gap:14px;margin-bottom:20px}
+.sechead .num{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--accent);
+  border:1px solid var(--rule-2);border-radius:3px;padding:2px 7px;flex:none}
+
+/* 파이프라인 */
+.pipe{display:grid;gap:0;margin:0 0 24px}
+.stage{
+  border:1px solid var(--rule);background:var(--panel);border-radius:5px;
+  padding:14px 18px;box-shadow:var(--shadow);
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 18px;align-items:center;
+}
+.stage .who{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3);grid-column:1/-1}
+.stage .what{font-weight:600;font-size:1rem}
+.stage .sig{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--ink-2);
+  text-align:right;white-space:nowrap;overflow-x:auto}
+.stage .dims{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.stage .dims > div{
+  border:1px solid var(--rule);border-radius:3px;padding:6px 10px;background:var(--panel-2);
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;
+}
+.stage .dims b{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--in);font-weight:600}
+.stage .dims span{font-size:.78rem;color:var(--ink-3)}
+.stage.input{border-left:3px solid var(--in)}
+.stage.engine{border-left:3px solid var(--accent);background:var(--accent-soft)}
+.stage.output{border-left:3px solid var(--ochre)}
+.arrow{justify-self:center;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;
+  font-size:.78rem;padding:7px 0;line-height:1}
+.arrow b{color:var(--accent);font-weight:500}
+
+/* 표 */
+.tablewrap{overflow-x:auto;margin:0 0 20px;border:1px solid var(--rule);
+  border-radius:4px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--rule);white-space:nowrap}
+thead th{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500;background:var(--panel-2)}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+td.desc{white-space:normal}
+tfoot td{font-family:"IBM Plex Mono",monospace;font-weight:500;background:var(--panel-2);
+  font-variant-numeric:tabular-nums;text-align:right;border-top:1px solid var(--rule-2)}
+tfoot td:first-child{text-align:left}
+
+pre{background:var(--panel);border:1px solid var(--rule);border-left:2px solid var(--accent);
+  padding:18px 20px;overflow-x:auto;font-size:.82rem;line-height:1.65;
+  margin:0 0 18px;border-radius:0 4px 4px 0}
+pre .c{color:var(--ink-3)}
+pre .k{color:var(--accent)}
+pre .o{color:var(--ochre)}
+
+.note{border-left:2px solid var(--ochre);background:var(--ochre-soft);
+  padding:16px 20px;margin:0 0 20px;border-radius:0 4px 4px 0;font-size:.97rem;line-height:1.7}
+.note b.lbl{font-family:Archivo,sans-serif;font-size:.82rem;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ochre);display:block;margin-bottom:5px}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:0 0 22px}
+.box{border:1px solid var(--rule);border-radius:5px;background:var(--panel);
+  padding:16px 18px;box-shadow:var(--shadow)}
+.box h3{margin:0 0 4px;font-size:1rem}
+.box .tag{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--accent);
+  letter-spacing:.06em;text-transform:uppercase}
+.box p{margin:8px 0 0;font-size:.94rem;color:var(--ink-2)}
+.key{background:var(--accent-soft);padding:.08em .3em;border-radius:2px}
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--rule);
+  font-size:.82rem;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">MuJoCo 2.3.7 · LIBERO libero_spatial 씬 실측</p>
+  <h1>MuJoCo 입출력 해부</h1>
+  <p class="lede col">물리 엔진이 실제로 받는 것은 <b>관절 토크 9개</b>, 돌려주는 것은 <b>일반화 좌표 48개와 속도 43개</b>다. 그 사이에서 접촉 87개와 제약 270개가 매 스텝 새로 풀린다.</p>
+  <div class="meta">
+    <span><b>씬</b> body 38 · geom 271 · mesh 79</span>
+    <span><b>물리</b> 500 Hz</span>
+    <span><b>정책</b> 20 Hz</span>
+    <span><b>솔버</b> Newton</span>
+  </div>
+</header>
+
+<section>
+  <div class="sechead"><span class="num">01</span><h2>두 개의 구조체가 전부다</h2></div>
+  <div class="col">
+    <p>MuJoCo API는 구조체 두 개로 정리된다. 이 구분이 입출력을 이해하는 출발점이다 — <b>바뀌지 않는 것과 매 스텝 바뀌는 것</b>이다.</p>
+  </div>
+  <div class="split">
+    <div class="box">
+      <span class="tag">정적 · 읽기 전용</span>
+      <h3>MjModel <code>m</code></h3>
+      <p>XML을 파싱해 만든 씬 정의. 질량, 관성, 마찰계수, 관절 한계, 액추에이터 범위, 메시 형상. 시뮬레이션 내내 <b>변하지 않는다.</b></p>
+    </div>
+    <div class="box">
+      <span class="tag">동적 · 매 스텝 갱신</span>
+      <h3>MjData <code>d</code></h3>
+      <p>현재 상태와 계산 결과 전부. 관절 위치·속도, 접촉 목록, 제약력, 센서값. <b>입력도 출력도 여기 들어 있다.</b></p>
+    </div>
+  </div>
+  <div class="col">
+    <p>즉 <code>mj_step(m, d)</code> 한 줄이 전부다. 모델을 참조해 <code>d</code>를 읽고, <code>d</code>를 덮어쓴다. 함수는 값을 반환하지 않는다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">02</span><h2>LIBERO에서 MuJoCo까지</h2></div>
+  <div class="col">
+    <p>우리가 <code>env.step()</code>에 넣는 7차원 행동은 MuJoCo에 그대로 가지 않는다. 중간에 robosuite의 컨트롤러가 있고, 단위도 차원도 바뀐다.</p>
+    <p><b>주의할 점은 이 7개가 관절 값이 아니라는 것이다.</b> 로봇 관절도 7개라 헷갈리기 쉽지만 우연의 일치다. 행동은 <b>그리퍼 말단</b> 기준의 상대 변화량이고, 좌표계 자체가 다르다. 그리고 역기구학으로 관절각을 푸는 단계는 <b>없다</b> — 말단 오차에서 힘을 구한 뒤 야코비안 <b>전치</b>로 토크를 만든다. 힘 제어라서 물체에 부딪히면 저항하는 만큼 자연히 멈춘다.</p>
+  </div>
+
+  <div class="pipe">
+    <div class="stage input">
+      <span class="who">정책 / 사람</span>
+      <span class="what">행동 — 그리퍼 말단의 변화량</span>
+      <span class="sig">(7,) float</span>
+      <div class="dims">
+        <div><b>dx</b> <b>dy</b> <b>dz</b><span>이동 · m · [−1, 1] → 목표 [−5, 5] cm</span></div>
+        <div><b>droll</b> <b>dpitch</b> <b>dyaw</b><span>회전 · rad · [−1, 1] → 목표 [−0.5, 0.5] rad</span></div>
+        <div><b>gripper</b><span>[−1, 1] · 부호만 사용 · − 열기 / 0 유지 / + 닫기</span></div>
+      </div>
+    </div>
+    <div class="arrow">↓ <b>OperationalSpaceController</b> · <span class="mono">τ = J<sup>T</sup>F</span> + 중력 보상</div>
+    <div class="stage input">
+      <span class="who">robosuite → MuJoCo 입력</span>
+      <span class="what"><code>d.ctrl</code> — 관절 토크 + 집게 목표 위치</span>
+      <span class="sig">(9,) float</span>
+      <div class="dims">
+        <div><b>j1 j2 j3 j4 j5</b><span>토크 · N·m · [−80, 80]</span></div>
+        <div><b>j6 j7</b><span>토크 · N·m · [−12, 12]</span></div>
+        <div><b>finger1</b><span>위치 · m · [0, 0.04]</span></div>
+        <div><b>finger2</b><span>위치 · m · [−0.04, 0]</span></div>
+      </div>
+    </div>
+    <div class="arrow">↓ <b>mj_step ×25</b> · 0.002초씩 적분</div>
+    <div class="stage engine">
+      <span class="who">MuJoCo 내부</span>
+      <span class="what">충돌 검출 → 제약 생성 → Newton 풀이 → Euler 적분</span>
+      <span class="sig">nefc 270</span>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="stage output">
+      <span class="who">MuJoCo 출력</span>
+      <span class="what"><code>d.qpos</code> <code>d.qvel</code> — 다음 상태</span>
+      <span class="sig">(48,) + (43,)</span>
+    </div>
+    <div class="arrow">↓ <b>렌더링</b> · OpenGL</div>
+    <div class="stage output">
+      <span class="who">robosuite → 정책</span>
+      <span class="what">관측 — 카메라 2대 + 고유수용 감각</span>
+      <span class="sig">(128,128,3) ×2</span>
+    </div>
+  </div>
+
+  <div class="note col">
+    <b class="lbl">주파수가 다르다</b>
+    정책은 <b>20 Hz</b>로 움직이고 물리는 <b>500 Hz</b>로 돈다. <code>env.step()</code> 한 번에 <code>mj_step</code>이 <b>25번</b> 실행된다. 정책이 보는 한 스텝은 물리에게는 25스텝이다.
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">03</span><h2>입력: <code>d.ctrl</code> 9개</h2></div>
+  <div class="col">
+    <p>MuJoCo가 실제로 받는 제어 입력은 이 배열 하나다. 앞의 7개는 <b>토크(N·m)</b>, 뒤의 2개는 집게 손가락의 <b>목표 위치(m)</b>다 — <b>한 배열 안에 단위가 섞여 있다.</b> 행동과 달리 정규화되어 있지 않고, 관절마다 범위도 다르다. 손목(j6, j7)이 어깨(j1–j5)보다 상한이 낮은 것은 실제 Franka Panda의 제원을 따른 것이다.</p>
+    <p>집게 두 값의 부호가 반대인 것은 손가락이 서로 마주 보고 움직이기 때문이다. 같은 크기로 반대 방향이면 대칭으로 오므라든다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>#</th><th>액추에이터</th><th>단위</th><th class="num">범위</th><th class="desc">역할</th></tr></thead>
+      <tbody>
+        <tr><td class="num">0–4</td><td><code>robot0_torq_j1…j5</code></td><td>N·m</td><td class="num">[−80, 80]</td><td class="desc">어깨·팔꿈치 — 큰 토크</td></tr>
+        <tr><td class="num">5–6</td><td><code>robot0_torq_j6, j7</code></td><td>N·m</td><td class="num">[−12, 12]</td><td class="desc">손목 — 작은 토크</td></tr>
+        <tr><td class="num">7</td><td><code>gripper0_finger_joint1</code></td><td>m</td><td class="num">[0, 0.04]</td><td class="desc">집게 손가락 1</td></tr>
+        <tr><td class="num">8</td><td><code>gripper0_finger_joint2</code></td><td>m</td><td class="num">[−0.04, 0]</td><td class="desc">집게 손가락 2 (반대 방향)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col"><p>실제로 변환되는 모습이다. 아래로 내리며 집게를 닫는 행동 하나가 9개 값으로 풀린다.</p></div>
+<pre><span class="c"># 정책이 낸 행동 (말단 기준 상대 이동량)</span>
+action = [ 0.0  0.0  <span class="o">-0.3</span>  0.0  0.0  0.0  <span class="o">-1.0</span> ]
+           dx   dy   dz  droll dpitch dyaw  gripper
+
+<span class="c"># OSC를 거쳐 MuJoCo에 들어간 값</span>
+d.ctrl = [ <span class="k">3.36  -13.13   4.11   16.44  -1.31   3.13  -0.66</span>   <span class="o">0.02  -0.02</span> ]
+           └────────── 관절 토크 7개 (N·m) ──────────┘   └─ 집게 ─┘</pre>
+
+  <div class="col">
+    <p>입력은 <b>정규화된 값</b>이라 거리 단위가 아니다. <code>[−1, 1]</code>이 <code>[−0.05, 0.05] m</code>에 선형 대응하므로 <code>dz = −0.3</code>은 <b>1.5 cm 아래</b>를 뜻한다. 범위를 벗어난 값은 잘려서, <code>−3</code>이나 <code>−10</code>을 넣어도 <code>−1</code>과 결과가 같다.</p>
+    <p>7차원 모두 <code>env.action_spec</code>이 선언하는 범위는 <code>[−1, 1]</code>로 같다. 다만 그 안에서 해석이 갈린다 — 앞 6개는 <b>선형</b>이라 <code>0.5</code>가 <code>1.0</code>의 정확히 절반이지만, 그리퍼는 <code>np.sign()</code>을 거쳐 <b>부호만</b> 쓰므로 <code>0.5</code>와 <code>1.0</code>이 같은 결과를 낸다. 게다가 즉시 열리고 닫히지 않는다 — 내부에 누적되는 상태가 있고 <code>speed=0.01</code>씩 움직여, 완전히 닫히는 데 <b>100스텝</b>이 걸린다.</p>
+    <p>다만 이것은 <b>한 스텝의 이동량이 아니라 목표</b>다. 순간이동이 아니라 PD 제어기(<code>kp=150</code>)가 그 방향으로 힘을 주는 것이라, <code>dz = −1.0</code>도 한 스텝에는 <b>0.61 cm</b>만 움직이고 20스텝 누적해야 25.7 cm에 이른다.</p>
+    <p><code>dz = -0.3</code> 하나가 <b>일곱 관절 전부에 서로 다른 토크</b>로 흩어진다. 팔을 수직으로 내리려면 어깨·팔꿈치·손목이 동시에 협응해야 하기 때문이다. 이 계산이 OSC의 일이고, MuJoCo는 관여하지 않는다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">04</span><h2>상태: 48 + 43 = 91</h2></div>
+  <div class="col">
+    <p>물리 상태는 위치와 속도 두 벡터로 완결된다. 차원이 다른 이유는 <b>회전을 표현하는 방식 때문</b>이다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>필드</th><th class="num">차원</th><th class="desc">내용</th></tr></thead>
+      <tbody>
+        <tr><td><code>d.qpos</code></td><td class="num">48</td><td class="desc">일반화 좌표 — 관절각 + 자유물체의 위치(3)와 쿼터니언(4)</td></tr>
+        <tr><td><code>d.qvel</code></td><td class="num">43</td><td class="desc">일반화 속도 — 관절 각속도 + 자유물체의 선속도(3)와 각속도(3)</td></tr>
+        <tr><td><code>d.time</code></td><td class="num">1</td><td class="desc">시뮬레이션 경과 시간</td></tr>
+      </tbody>
+      <tfoot><tr><td>LIBERO <code>states</code> 1행</td><td class="num">92</td><td class="desc">= 1 + 48 + 43</td></tr></tfoot>
+    </table>
+  </div>
+  <div class="col">
+    <p>자유물체 하나는 위치에 <b>7칸</b>(xyz + 쿼터니언 4)을 쓰지만 속도는 <b>6칸</b>(선속도 3 + 각속도 3)만 쓴다. 쿼터니언은 4개 성분이되 자유도는 3이기 때문이다. 이 씬의 자유물체는 <b>검은 그릇 2개 · 쿠키 상자 · 라미킨 · 접시</b> 다섯이고, 그래서 정확히 <span class="key">48 − 43 = 5</span>의 차이가 난다. 로봇 관절(hinge 8 · slide 5)은 자유도가 그대로라 차이에 기여하지 않는다.</p>
+    <p>그리고 이 92라는 숫자가 <b>데이터셋의 <code>states</code> 열 개수와 정확히 일치한다.</b> 데모 파일에 저장된 것은 가공된 요약이 아니라 <b>MuJoCo 상태 그 자체</b>다. 그래서 주입하면 완벽하게 재현된다.</p>
+  </div>
+
+  <div class="note col">
+    <b class="lbl">92는 이 씬에만 해당한다</b>
+    상태 차원은 <code>1 + nq + nv</code>이고, <b>씬마다 물체와 관절 수가 달라 값이 바뀐다.</b> LIBERO 130개 태스크를 전부 재보면 <b>45에서 123까지 13가지</b>가 나온다.
+    <div class="tablewrap" style="margin:12px 0 0">
+      <table>
+        <thead><tr><th>스위트</th><th class="num">상태 차원</th><th class="desc">해석</th></tr></thead>
+        <tbody>
+          <tr><td><code>libero_spatial</code></td><td class="num">92</td><td class="desc">10개 태스크가 <b>모두 같은 씬</b></td></tr>
+          <tr><td><code>libero_object</code></td><td class="num">110</td><td class="desc">모두 같은 씬 (물체가 더 많다)</td></tr>
+          <tr><td><code>libero_goal</code></td><td class="num">79</td><td class="desc">모두 같은 씬</td></tr>
+          <tr><td><code>libero_10</code></td><td class="num">45–123</td><td class="desc">6가지 — 씬이 태스크마다 다르다</td></tr>
+          <tr><td><code>libero_90</code></td><td class="num">45–123</td><td class="desc">10가지 — 20개 씬에 분포</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin:12px 0 0">앞의 세 스위트가 <b>차원이 하나로 고정</b>인 것이 통제 설계의 증거다 — 물체 구성을 바꾸지 않았으므로 상태 크기도 변하지 않는다. 반면 <code>libero_10</code>과 <code>libero_90</code>은 씬이 달라지니 차원도 흩어진다.</p>
+  </div>
+
+  <div class="col">
+    <p>MuJoCo에서 <b>움직이려면 반드시 관절이 있어야 한다.</b> 관절이 없는 body는 부모에 용접된 것처럼 고정된다. 관절 유형이 곧 "부모에 대해 어떻게 움직일 수 있는가"이고, 그것이 <code>qpos</code>·<code>qvel</code>에서 몇 칸을 쓰는지까지 결정한다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>관절 유형</th><th class="num">자유도</th><th class="num">qpos</th><th class="num">qvel</th><th class="desc">움직임</th><th class="desc">이 씬에서</th></tr></thead>
+      <tbody>
+        <tr><td>(관절 없음)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="desc">부모에 고정 — 절대 안 움직인다</td><td class="desc">테이블·벽·로봇 받침 등 <b>body 20개</b></td></tr>
+        <tr><td><code>HINGE</code></td><td class="num">1</td><td class="num">1</td><td class="num">1</td><td class="desc">정해진 축으로 <b>회전만</b>. 각도 하나</td><td class="desc">로봇 관절 7 + 스토브 노브 1 = <b>8</b></td></tr>
+        <tr><td><code>SLIDE</code></td><td class="num">1</td><td class="num">1</td><td class="num">1</td><td class="desc">정해진 축으로 <b>직선 이동만</b>. 거리 하나</td><td class="desc">집게 손가락 2 + 서랍 3단 = <b>5</b></td></tr>
+        <tr><td><code>BALL</code></td><td class="num">3</td><td class="num">4</td><td class="num">3</td><td class="desc">한 점을 중심으로 임의 회전 (구관절)</td><td class="desc">없음</td></tr>
+        <tr><td><code>FREE</code></td><td class="num">6</td><td class="num">7</td><td class="num">6</td><td class="desc"><b>아무 제약 없음</b> — 이동 3 + 회전 3</td><td class="desc">그릇 2·쿠키·라미킨·접시 = <b>5</b></td></tr>
+      </tbody>
+      <tfoot><tr><td>합계</td><td class="num">43</td><td class="num">48</td><td class="num">43</td><td colspan="2">관절 18개 · nq−nv = 5 = FREE 개수</td></tr></tfoot>
+    </table>
+  </div>
+  <div class="col">
+    <p><code>FREE</code>만 <code>qpos</code>와 <code>qvel</code>의 칸 수가 다르다. 자세 3자유도를 쿼터니언 4칸으로 적기 때문이다. 그래서 <b>두 배열의 주소가 자유 관절을 지날 때마다 1씩 어긋난다</b> — 아래 표에서 그릇 2번부터 시작 주소가 갈리는 것이 그것이다. <code>qpos</code> 인덱스로 <code>qvel</code>을 자르면 에러 없이 엉뚱한 물체의 값을 읽으므로, 주소는 늘 <code>jnt_qposadr</code>와 <code>jnt_dofadr</code>로 따로 조회한다.</p>
+  </div>
+
+  <div class="col">
+    <p>92개 슬롯이 무엇에 배정되는지는 모델에서 그대로 읽을 수 있다. 관절마다 <code>jnt_qposadr</code>와 <code>jnt_dofadr</code>가 시작 주소를 가리킨다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="num">qpos</th><th class="num">qvel</th><th>관절 종류</th><th class="desc">대상</th></tr></thead>
+      <tbody>
+        <tr><td class="num">0–6</td><td class="num">0–6</td><td class="mono">HINGE ×7</td><td class="desc">로봇 관절 <code>j1</code>–<code>j7</code></td></tr>
+        <tr><td class="num">7–8</td><td class="num">7–8</td><td class="mono">SLIDE ×2</td><td class="desc">집게 손가락 2개</td></tr>
+        <tr><td class="num">9–15</td><td class="num">9–14</td><td class="mono">FREE</td><td class="desc">akita_black_bowl_1 — <b>목표 그릇</b></td></tr>
+        <tr><td class="num">16–22</td><td class="num">15–20</td><td class="mono">FREE</td><td class="desc">akita_black_bowl_2 — 방해 그릇</td></tr>
+        <tr><td class="num">23–29</td><td class="num">21–26</td><td class="mono">FREE</td><td class="desc">cookies_1</td></tr>
+        <tr><td class="num">30–36</td><td class="num">27–32</td><td class="mono">FREE</td><td class="desc">glazed_rim_porcelain_ramekin_1</td></tr>
+        <tr><td class="num">37–43</td><td class="num">33–38</td><td class="mono">FREE</td><td class="desc">plate_1</td></tr>
+        <tr><td class="num">44–46</td><td class="num">39–41</td><td class="mono">SLIDE ×3</td><td class="desc">wooden_cabinet_1 서랍 상·중·하</td></tr>
+        <tr><td class="num">47</td><td class="num">42</td><td class="mono">HINGE</td><td class="desc">flat_stove_1_button — 스토브 노브</td></tr>
+      </tbody>
+      <tfoot><tr><td class="num">48</td><td class="num">43</td><td colspan="2">+ 시간 1 = <b>92</b></td></tr></tfoot>
+    </table>
+  </div>
+  <div class="col">
+    <p><b>가구도 상태를 가진다.</b> 서랍 3단과 스토브 노브가 각각 슬롯을 차지한다 — 눈에 잘 띄지 않지만 이 4개가 <code>libero_goal</code>의 "서랍 열기", "스토브 켜기" 같은 태스크에서 <b>성공 판정의 근거</b>가 된다. <code>(Open ...)</code>과 <code>(TurnOn ...)</code> 술어가 읽는 값이 바로 여기다.</p>
+    <p>정리하면 92 = <span class="key">로봇 9 + 물체 35 + 가구 4 + 시간 1</span>이고, 태스크 성공 여부를 결정하는 것은 뒤쪽 39개다. 로봇의 자세는 성공 판정에 들어가지 않는다 — 물체가 제자리에 있으면 팔이 어떤 모양이든 성공이다.</p>
+  </div>
+
+</section>
+
+<section>
+  <div class="sechead"><span class="num">05</span><h2>출력: 상태 말고도 많다</h2></div>
+  <div class="col">
+    <p><code>mj_step</code>이 갱신하는 것은 상태만이 아니다. 계산 도중 나온 중간 결과가 전부 <code>d</code>에 남고, 이것들이 접촉 해석의 재료가 된다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>필드</th><th class="num">shape</th><th class="desc">내용</th></tr></thead>
+      <tbody>
+        <tr><td><code>d.qacc</code></td><td class="num">(43,)</td><td class="desc">일반화 가속도</td></tr>
+        <tr><td><code>d.xpos</code> / <code>d.xquat</code></td><td class="num">(38,3) / (38,4)</td><td class="desc">모든 body의 월드 좌표·자세 — 물체 위치는 여기서 읽는다</td></tr>
+        <tr><td><code>d.ncon</code></td><td class="num">스칼라</td><td class="desc">이번 스텝의 접촉점 개수 — <b>매 스텝 달라진다</b></td></tr>
+        <tr><td><code>d.contact[i]</code></td><td class="num">가변</td><td class="desc">접촉 하나의 상세: 두 geom, 침투 깊이, 마찰, 접촉 좌표계</td></tr>
+        <tr><td><code>d.efc_force</code></td><td class="num">(270,)</td><td class="desc">제약력 — 접촉·관절한계를 유지하는 힘</td></tr>
+        <tr><td><code>d.cfrc_ext</code></td><td class="num">(38,6)</td><td class="desc">body에 걸린 외력/토크</td></tr>
+        <tr><td><code>d.actuator_force</code></td><td class="num">(9,)</td><td class="desc">액추에이터가 실제로 낸 힘</td></tr>
+        <tr><td><code>d.sensordata</code></td><td class="num">(6,)</td><td class="desc">힘·토크 센서</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p><code>d.xpos</code>가 <b>38개</b>인 것이 많아 보이지만, 눈에 보이는 "물건" 9개가 <b>따로 움직이는 단위</b>로 쪼개진 결과다. body는 움직임의 단위이고, geom은 충돌 형상 조각이라 개수가 다르다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>묶음</th><th class="num">body</th><th class="num">geom</th><th class="desc">구성과 쪼개진 이유</th></tr></thead>
+      <tbody>
+        <tr><td>로봇 팔</td><td class="num">10</td><td class="num">58</td><td class="desc"><code>base</code> · <code>link0</code>–<code>link7</code> · <code>right_hand</code> — 관절마다 링크가 하나씩 있어야 따로 굽는다</td></tr>
+        <tr><td>그리퍼</td><td class="num">6</td><td class="num">6</td><td class="desc">몸체 · 손가락 2 · 손가락 끝 2 · <code>eef</code> — 손가락이 각각 접촉해야 하므로 분리</td></tr>
+        <tr><td>가구 · 고정물</td><td class="num">12</td><td class="num">80</td><td class="desc"><code>world</code> · <code>table</code> · 캐비닛 5(몸통+서랍 3단) · 스토브 5(노브 포함) — 서랍과 노브가 움직인다</td></tr>
+        <tr><td>로봇 받침대</td><td class="num">5</td><td class="num">5</td><td class="desc"><code>mount0</code> 계열 — 고정이지만 XML 구조상 나뉘어 있다</td></tr>
+        <tr><td><b>조작 물체</b></td><td class="num">5</td><td class="num">121</td><td class="desc">그릇 2 · 쿠키 · 라미킨 · 접시 — <b>물체 하나가 body 하나.</b> 대신 오목한 형상을 볼록 조각으로 쪼개 geom이 많다 (그릇 41개)</td></tr>
+      </tbody>
+      <tfoot><tr><td>합계</td><td class="num">38</td><td class="num">271</td><td class="desc"></td></tr></tfoot>
+    </table>
+  </div>
+  <div class="col">
+    <p>geom이 0인 body도 있다 — <code>robot0_base</code>, <code>gripper0_eef</code>, <code>flat_stove_1_main</code>. <b>형상 없이 좌표계 역할만</b> 하는 것들이다. 정책이 행동의 기준으로 삼는 <code>eef</code>가 여기 속한다. 물리적 실체는 없고 "여기가 손끝"이라는 기준점이다.</p>
+    <p>그릇 하나에 geom이 41개인 이유는 <b>MuJoCo의 충돌 검출이 볼록 형상만 다루기 때문</b>이다. 오목한 그릇 안쪽을 표현하려면 볼록 조각 여러 개로 쪼개야 한다. 앞서 접촉이 87개나 잡혔던 것도 이 조각들이 각각 테이블과 닿기 때문이다.</p>
+  </div>
+
+  <div class="col"><p>접촉 하나를 열어보면 이렇게 생겼다. 그릇이 테이블에 놓여 있는 상태다.</p></div>
+<pre>d.ncon = <span class="o">87</span>
+
+d.contact[0]
+  geom1     table_collision
+  geom2     akita_black_bowl_1_g36
+  dist      <span class="o">-0.00000</span>      <span class="c"># 음수 = 침투 깊이. 0에 붙어 있음 = 정확히 닿음</span>
+  friction  [0.95 0.95 0.3 0.1 0.1]
+             └ 미끄럼 ┘  회전  └ 구름 ┘</pre>
+
+  <div class="note col">
+    <b class="lbl">여기가 민감한 지점이다</b>
+    접촉 87개에 제약 270개짜리 연립 방정식을 Newton법으로 푼다. 집게가 1 mm 어긋나면 <b>접촉 집합 자체가 바뀌어</b> 해가 불연속적으로 달라진다. 물리는 완전히 결정론적이지만(같은 입력 재실행 시 최종 상태 차이 <code>0.000e+00</code>) 조건이 극도로 나쁘다. 파지 실패는 무작위가 아니라 <b>이 불연속을 넘은 결과</b>다.
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">06</span><h2>솔버 설정</h2></div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>항목</th><th>값</th><th class="desc">의미</th></tr></thead>
+      <tbody>
+        <tr><td>timestep</td><td class="mono">0.002 s</td><td class="desc">500 Hz</td></tr>
+        <tr><td>integrator</td><td class="mono">Euler</td><td class="desc">1차 적분 — 빠르지만 큰 스텝에 취약</td></tr>
+        <tr><td>solver</td><td class="mono">Newton</td><td class="desc">최대 100회 반복</td></tr>
+        <tr><td>friction cone</td><td class="mono">Elliptic</td><td class="desc">피라미드 근사보다 정확</td></tr>
+        <tr><td>impratio</td><td class="mono">20.0</td><td class="desc">마찰 방향 강성을 수직의 20배 — <b>미끄러짐 억제</b> (기본값 1)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p><code>impratio=20</code>은 robosuite가 올려둔 값이다. 기본값 1로는 로봇이 물체를 쥐어도 자꾸 빠진다. 즉 <b>이 시뮬레이터의 파지는 현실보다 관대하게 조정되어 있다</b> — 벤치마크 점수를 실제 로봇 성능으로 옮겨 읽을 때 감안해야 할 부분이다.</p>
+  </div>
+</section>
+
+<footer>
+  MuJoCo 2.3.7 · robosuite 1.4.1 · 모든 수치는 libero_spatial 태스크 0 씬을 실제로 적재해 측정
+</footer>
+
+</div>

@@ -1,0 +1,376 @@
+<title>LIBERO 파인튜닝 관행</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --ground:#f2f4f5; --panel:#ffffff; --panel-2:#e9edef;
+  --ink:#151c22; --ink-2:#3f4b54; --ink-3:#6b7880;
+  --rule:#d2dade; --rule-2:#bcc7cd;
+  --accent:#0d6b6d; --accent-soft:#d8ebea;
+  --ochre:#9a5b12; --ochre-soft:#f3e6d3;
+  --red:#a33224; --red-soft:#f6e2df;
+  --shadow:0 1px 2px rgba(21,28,34,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#101619; --panel:#171f24; --panel-2:#1e282e;
+    --ink:#e7eef1; --ink-2:#b0bfc7; --ink-3:#7e8f99;
+    --rule:#2a363d; --rule-2:#3a4952;
+    --accent:#5cc7c2; --accent-soft:#16332f;
+    --ochre:#d99b4e; --ochre-soft:#33260f;
+    --red:#e8836f; --red-soft:#38201c;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101619; --panel:#171f24; --panel-2:#1e282e;
+  --ink:#e7eef1; --ink-2:#b0bfc7; --ink-3:#7e8f99;
+  --rule:#2a363d; --rule-2:#3a4952;
+  --accent:#5cc7c2; --accent-soft:#16332f;
+  --ochre:#d99b4e; --ochre-soft:#33260f;
+  --red:#e8836f; --red-soft:#38201c;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
+  font-size:16.5px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:54px 28px 92px}
+.col{max-width:700px}
+h1,h2,h3{font-family:Archivo,"Helvetica Neue",Arial,sans-serif;text-wrap:balance}
+h1{font-size:2.4rem;line-height:1.1;letter-spacing:-.022em;font-weight:700;margin:0 0 14px}
+h2{font-size:1.4rem;line-height:1.2;letter-spacing:-.014em;font-weight:600;margin:0}
+p{margin:0 0 16px}
+.mono,code,pre{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace}
+code{font-size:.86em;background:var(--panel-2);padding:.12em .38em;border-radius:3px;color:var(--ink)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+.lede{font-size:1.12rem;color:var(--ink-2);margin:0 0 8px}
+header{border-bottom:1px solid var(--rule);padding-bottom:30px}
+section{padding-top:44px}
+.sechead{display:flex;align-items:baseline;gap:14px;margin-bottom:20px}
+.sechead .num{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--accent);
+  border:1px solid var(--rule-2);border-radius:3px;padding:2px 7px;flex:none}
+pre{background:var(--panel);border:1px solid var(--rule);border-left:2px solid var(--accent);
+  padding:18px 20px;overflow-x:auto;font-size:.82rem;line-height:1.7;
+  margin:0 0 18px;border-radius:0 4px 4px 0}
+pre .c{color:var(--ink-3)} pre .k{color:var(--accent)} pre .o{color:var(--ochre)}
+.tablewrap{overflow-x:auto;margin:0 0 20px;border:1px solid var(--rule);
+  border-radius:4px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--rule);white-space:nowrap}
+thead th{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500;background:var(--panel-2)}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+td.desc{white-space:normal}
+tfoot td{font-family:"IBM Plex Mono",monospace;font-weight:500;background:var(--panel-2);
+  font-variant-numeric:tabular-nums;text-align:right;border-top:1px solid var(--rule-2)}
+tfoot td:first-child{text-align:left}
+.note{border-left:2px solid var(--ochre);background:var(--ochre-soft);
+  padding:16px 20px;margin:0 0 20px;border-radius:0 4px 4px 0;font-size:.97rem;line-height:1.7}
+.note.red{border-left-color:var(--red);background:var(--red-soft)}
+.note b.lbl{font-family:Archivo,sans-serif;font-size:.8rem;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ochre);display:block;margin-bottom:5px}
+.note.red b.lbl{color:var(--red)}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.note.red a{color:var(--red)}
+.src{margin-top:26px;border-top:1px solid var(--rule);padding-top:18px;font-size:.9rem;color:var(--ink-2)}
+.src ul{margin:8px 0 0;padding-left:20px}
+.src li{margin:4px 0}
+.key{background:var(--accent-soft);padding:.08em .3em;border-radius:2px}
+.gap{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 20px}
+.gap div{border:1px solid var(--rule);border-radius:5px;background:var(--panel);
+  padding:14px 15px;box-shadow:var(--shadow)}
+.gap .t{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+.gap .v{font-family:"IBM Plex Mono",monospace;font-size:1.55rem;font-weight:600;
+  font-variant-numeric:tabular-nums;line-height:1.1}
+.gap .v.hi{color:var(--accent)} .gap .v.lo{color:var(--red)}
+.gap .s{font-size:.82rem;color:var(--ink-3);margin-top:3px}
+.vf{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.05em;
+  text-transform:uppercase;padding:2px 7px;border-radius:3px;white-space:nowrap}
+.vf.ok{background:var(--accent-soft);color:var(--accent)}
+.vf.inf{background:var(--ochre-soft);color:var(--ochre)}
+footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);
+  font-size:.82rem;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">2026-09-10 확인 · 출처 직접 대조</p>
+  <h1>LIBERO 파인튜닝 관행</h1>
+  <p class="lede col">배포된 π₀-LIBERO 체크포인트가 <b>정확히 무엇으로 학습되고 무엇으로 평가됐는지</b>를 데이터셋 메타데이터까지 추적했다. 그리고 그것이 VLA 분야의 표준 관행인지 따져본다.</p>
+</header>
+
+<section>
+  <div class="sechead"><span class="num">01</span><h2>결론</h2></div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="desc">질문</th><th class="desc">답</th><th>근거</th></tr></thead>
+      <tbody>
+        <tr><td class="desc">4개 스위트로 학습한 게 맞나</td><td class="desc"><b>맞다.</b> spatial · object · goal · 10 각 10개 = <b>40 태스크</b></td><td><span class="vf ok">검증</span></td></tr>
+        <tr><td class="desc"><code>libero_90</code>이 포함됐나</td><td class="desc"><b>아니다.</b> 90 전용 태스크가 <b>하나도 없다</b></td><td><span class="vf ok">검증</span></td></tr>
+        <tr><td class="desc">데모 50개를 다 썼나</td><td class="desc"><b>아니다.</b> 2,000개 중 <b>1,693개</b>만. 거른 주체는 <b>OpenVLA 팀</b>(<code>no_noops</code>)</td><td><span class="vf ok">검증</span></td></tr>
+        <tr><td class="desc">평가는 어디서</td><td class="desc">학습한 그 4개 스위트. <code>libero_90</code>은 보고되지 않음</td><td><span class="vf ok">검증</span></td></tr>
+        <tr><td class="desc">평가 시작점은 무엇인가</td><td class="desc">저장소의 <code>.pruned_init</code> <b>50개를 순서대로 전부</b></td><td><span class="vf ok">검증</span></td></tr>
+        <tr><td class="desc">이것이 VLA의 표준인가</td><td class="desc">4개 스위트 사용은 <b>사실상 표준</b>. 다만 재는 대상은 오해되기 쉽다</td><td><span class="vf inf">추정</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">02</span><h2>무엇으로 학습했는가</h2></div>
+  <div class="col">
+    <p>openpi 문서에는 파인튜닝 데이터 구성이 적혀 있지 않다. 대신 학습 설정 파일이 데이터셋을 가리킨다.</p>
+  </div>
+<pre><span class="c"># openpi/src/openpi/training/config.py</span>
+name=<span class="o">"pi05_libero"</span>
+repo_id=<span class="k">"physical-intelligence/libero"</span>   <span class="c"># HuggingFace 데이터셋</span></pre>
+  <div class="col"><p>그 데이터셋의 메타데이터가 답을 준다.</p></div>
+<pre><span class="c"># meta/info.json</span>
+"robot_type":     "panda"
+"total_tasks":    <span class="k">40</span>
+"total_episodes": <span class="k">1693</span>
+"total_frames":   273465</pre>
+  <div class="col">
+    <p><b>40개 태스크.</b> 4개 스위트 × 10이다. 그런데 이름만으로는 어느 스위트인지 알 수 없으므로, <code>meta/tasks.jsonl</code>의 지시문 40개를 LIBERO 저장소의 130개 태스크와 <b>문자열로 직접 대조</b>했다.</p>
+  </div>
+<pre>openpi 학습 데이터 40개 태스크의 출처
+  libero_spatial   <span class="k">10</span>개
+  libero_object    <span class="k">10</span>개
+  libero_goal      <span class="k">10</span>개
+  libero_10        <span class="k">10</span>개
+  <span class="o">libero_90         0개</span>
+
+libero_90 에만 있는 태스크가 포함됐는가: <span class="o">False</span></pre>
+  <div class="col">
+    <p>대조 과정에서 <b>같은 지시문이 두 스위트에 존재하는 경우</b>가 2건 나왔다 — <span class="mono" style="font-size:.85em">"turn on the stove"</span>는 <code>libero_goal</code>과 <code>libero_90</code>에 모두 있고, <span class="mono" style="font-size:.85em">"pick up the book and place it in the back compartment of the caddy"</span>는 <code>libero_10</code>과 <code>libero_90</code>에 있다. 앞 스위트를 우선해 집계하면 정확히 10/10/10/10으로 갈린다.</p>
+  </div>
+
+  <div class="note col">
+    <b class="lbl">데모는 전부 쓰이지 않았다</b>
+    40 태스크 × 50 데모 = <b>2,000개</b>가 가능한데 실제 학습 데이터는 <b>1,693개</b>다. <b>307개(15%)가 제외</b>됐다. 따라서 "태스크당 50개로 학습"이라는 서술은 이 체크포인트에 대해 <b>정확하지 않다.</b> 누가 무엇을 기준으로 걸렀는지는 다음 절에서 추적한다.
+  </div>
+</section>
+
+
+<section>
+  <div class="sechead"><span class="num">03</span><h2>1,693개는 누가 걸렀는가</h2></div>
+  <div class="col">
+    <p>openpi의 변환 스크립트는 필터를 돌리지 않는다. <b>이미 가공된 데이터를 받아온다.</b></p>
+  </div>
+<pre><span class="c"># openpi/examples/libero/convert_libero_data_to_lerobot.py</span>
+RAW_DATASET_NAMES = [
+    <span class="k">"libero_10_no_noops"</span>,      <span class="c"># 4개 스위트가 하드코딩되어 있다</span>
+    <span class="k">"libero_goal_no_noops"</span>,
+    <span class="k">"libero_object_no_noops"</span>,
+    <span class="k">"libero_spatial_no_noops"</span>,
+]
+<span class="c"># https://huggingface.co/datasets/openvla/modified_libero_rlds</span></pre>
+  <div class="col">
+    <p>이 목록 자체가 <b>“4개 스위트, <code>libero_90</code> 없음”을 독립적으로 재확인</b>해준다. 앞 절의 지시문 대조와 별개의 근거다.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>단계</th><th class="desc">주체 · 한 일</th><th class="num">결과</th></tr></thead>
+      <tbody>
+        <tr><td>LIBERO 원본</td><td class="desc">130 태스크 × 데모 50 · GitHub + 별도 다운로드</td><td class="num">6,500</td></tr>
+        <tr><td><a href="https://huggingface.co/datasets/openvla/modified_libero_rlds" target="_blank" rel="noopener"><code>openvla/modified_libero_rlds</code></a></td><td class="desc"><b>OpenVLA 팀</b> — 4개 스위트 선택 + <code>no_noops</code> 처리 · MIT · 2024-09</td><td class="num">—</td></tr>
+        <tr><td><a href="https://huggingface.co/datasets/physical-intelligence/libero" target="_blank" rel="noopener"><code>physical-intelligence/libero</code></a></td><td class="desc"><b>Physical Intelligence</b> — LeRobot 포맷 변환 · CC-BY-4.0 · 2025-02</td><td class="num">1,693</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p><b>두 데이터셋 모두 HuggingFace에 공개되어 있다.</b> 상류인 <code>openvla/modified_libero_rlds</code>의 최상위 디렉터리가 <code>libero_10_no_noops</code> · <code>libero_goal_no_noops</code> · <code>libero_object_no_noops</code> · <code>libero_spatial_no_noops</code> <b>넷뿐이라는 것</b>이 또 하나의 확인이다.</p>
+    <p><b>거르는 일을 한 것은 OpenVLA 팀이다.</b> 변환 스크립트 본문에는 조건문도 건너뛰기도 없고, 에피소드와 스텝을 전부 그대로 옮긴다 — 개수를 정한 것은 상류 단계다.</p>
+  </div>
+
+  <div class="note col">
+    <b class="lbl"><code>no_noops</code> — 움직임 없는 프레임 제거</b>
+    사람이 조종하다 잠깐 멈춘 구간을 걷어낸다. 그래서 <b>남은 데모의 궤적도 짧아진다.</b> <code>libero_spatial</code> 0번을 원본과 대조하면 길이 분포가 <code>85: 2→1</code>, <code>84: 2→3</code>, <code>92: 5→6</code>으로 <b>원본에 없던 길이가 생긴다.</b> 단순히 골라낸 것이 아니라는 증거다.
+  </div>
+
+  <div class="col">
+    <p>제외는 균일하지 않다. 태스크당 남은 데모가 <b>29개에서 50개까지</b> 흩어져 있고, 스위트별 손실률도 다르다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>스위트</th><th class="num">남은 에피소드</th><th class="num">가능(50×10)</th><th class="num">제외</th><th class="num">비율</th></tr></thead>
+      <tbody>
+        <tr><td><code>libero_object</code></td><td class="num">454</td><td class="num">500</td><td class="num">46</td><td class="num">9%</td></tr>
+        <tr><td><code>libero_spatial</code></td><td class="num">432</td><td class="num">500</td><td class="num">68</td><td class="num">14%</td></tr>
+        <tr><td><code>libero_goal</code></td><td class="num">428</td><td class="num">500</td><td class="num">72</td><td class="num">14%</td></tr>
+        <tr><td><code>libero_10</code></td><td class="num">379</td><td class="num">500</td><td class="num">121</td><td class="num"><b>24%</b></td></tr>
+      </tbody>
+      <tfoot><tr><td>합계</td><td class="num">1,693</td><td class="num">2,000</td><td class="num">307</td><td class="num">15%</td></tr></tfoot>
+    </table>
+  </div>
+  <div class="col">
+    <p><b><code>libero_10</code>이 가장 많이 잘렸다 — 24%.</b> 장기 과제라 궤적이 길고(최대 505스텝) 중간에 멈칫거리는 구간이 많아 걸러질 확률이 높다. 반대로 단순한 집어-옮기기인 <code>libero_object</code>는 9%만 빠졌다.</p>
+  </div>
+
+  <div class="col">
+    <p>포맷 변환 단계에서 개수는 보존되지만 <b>저장되는 필드는 재구성된다.</b></p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>LIBERO 원본 hdf5</th><th>openpi LeRobot</th><th class="desc">비고</th></tr></thead>
+      <tbody>
+        <tr><td><code>agentview_image</code> 128²</td><td><code>image</code> 256²</td><td class="desc">해상도가 커졌다 — 상류에서 재렌더링</td></tr>
+        <tr><td><code>eye_in_hand_image</code> 128²</td><td><code>wrist_image</code> 256²</td><td class="desc"></td></tr>
+        <tr><td><code>robot_states</code> 등</td><td><code>state</code> (8,)</td><td class="desc">고유수용 감각만 추림</td></tr>
+        <tr><td><code>actions</code> (7,)</td><td><code>actions</code> (7,)</td><td class="desc">동일</td></tr>
+        <tr><td><code>states</code> (92,)</td><td>—</td><td class="desc"><b>빠진다.</b> MuJoCo 상태가 없어 완벽 재현은 불가</td></tr>
+        <tr><td><code>dones</code> · <code>rewards</code></td><td>—</td><td class="desc">빠진다</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note col">
+    <b class="lbl">아직 확인되지 않은 것</b>
+    <code>no_noops</code>의 <b>정확한 임계값</b>과, 실패한 데모도 함께 제외했는지는 한 곳에 문서화되어 있지 않다. OpenVLA README는 <i>“how we modify the provided demonstration datasets to improve the overall performance of all methods”</i>라며 논문 부록 E로 넘긴다. 다만 <b>구성 자체는 확인 가능하다</b> — <code>openvla/modified_libero_rlds</code>가 공개 데이터셋이므로 받아서 원본과 대조하면 규칙을 역으로 확정할 수 있다.
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">04</span><h2>무엇으로 평가했는가</h2></div>
+  <div class="col">
+    <p>openpi가 공개한 성적표는 학습한 바로 그 4개 스위트다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>스위트</th><th class="num">성공률</th><th class="desc">학습에 포함</th></tr></thead>
+      <tbody>
+        <tr><td>Libero Spatial</td><td class="num">98.8%</td><td class="desc">○</td></tr>
+        <tr><td>Libero Object</td><td class="num">98.2%</td><td class="desc">○</td></tr>
+        <tr><td>Libero Goal</td><td class="num">98.0%</td><td class="desc">○</td></tr>
+        <tr><td>Libero 10</td><td class="num">92.4%</td><td class="desc">○</td></tr>
+        <tr><td><code>libero_90</code></td><td class="num">—</td><td class="desc">✗ · <b>보고되지 않음</b></td></tr>
+      </tbody>
+      <tfoot><tr><td>평균</td><td class="num">96.85%</td><td class="desc"></td></tr></tfoot>
+    </table>
+  </div>
+  <div class="col">
+    <p>평가 스크립트를 열어보면 시작점을 어디서 가져오는지 분명하다.</p>
+  </div>
+<pre><span class="c"># openpi/examples/libero/main.py</span>
+initial_states = task_suite.<span class="k">get_task_init_states</span>(task_id)   <span class="c"># .pruned_init 로드</span>
+obs = env.<span class="k">set_init_state</span>(initial_states[episode_idx])     <span class="c"># 0~49 순서대로</span>
+
+num_trials_per_task: int = <span class="o">50</span>     <span class="c"># 태스크당 50회</span></pre>
+  <div class="col">
+    <p><b>저장소에 포함된 <code>.pruned_init</code> 50개를 순서대로 전부 쓴다.</b> 무작위 표집도, 일부만 고르는 것도 아니다. 파일로 고정되어 배포되므로 누가 언제 돌려도 같은 배치에서 시작한다 — 각자 표집하면 좌표가 달라져 논문끼리 비교가 불가능해지기 때문이다.</p>
+    <p><b>롤아웃은 50회다.</b> LIBERO 저장소의 평가 기본값 <code>n_eval: 20</code>이 아니다.</p>
+  </div>
+
+  <div class="col">
+    <p>제한 스텝도 저장소 기본값(600)을 쓰지 않는다. <b>스위트마다 다르게, 학습 데모의 최대 길이에 맞춰</b> 잡혀 있다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>스위트</th><th class="num">max_steps</th><th class="num">가장 긴 학습 데모</th><th class="desc">여유</th></tr></thead>
+      <tbody>
+        <tr><td><code>libero_spatial</code></td><td class="num">220</td><td class="num">193</td><td class="desc">+14%</td></tr>
+        <tr><td><code>libero_object</code></td><td class="num">280</td><td class="num">254</td><td class="desc">+10%</td></tr>
+        <tr><td><code>libero_goal</code></td><td class="num">300</td><td class="num">270</td><td class="desc">+11%</td></tr>
+        <tr><td><code>libero_10</code></td><td class="num">520</td><td class="num">505</td><td class="desc">+3%</td></tr>
+        <tr><td><code>libero_90</code></td><td class="num">400</td><td class="num">373</td><td class="desc">+7%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p><b>여유가 10% 안팎으로 빡빡하다.</b> 사람 데모보다 조금이라도 오래 걸리면 실패다. 특히 <code>libero_10</code>은 <b>+3%</b>로, 사실상 데모와 같은 속도로 끝내야 한다. 헤매다 회복하는 정책은 성공 판정을 받지 못한다.</p>
+    <p>평가 스크립트 자체는 <code>libero_90</code>도 지원한다 — 배포 체크포인트가 그 태스크들을 학습하지 않았을 뿐이다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">05</span><h2>그 밖의 태스크에서는</h2></div>
+  <div class="col">
+    <p>openpi 저장소에 이 지점을 정면으로 찌르는 이슈가 있다.</p>
+  </div>
+  <div class="note red col">
+    <b class="lbl">Issue #734 · 2025-10-20 · 답변 없음</b>
+    <a href="https://github.com/Physical-Intelligence/openpi/issues/734" target="_blank" rel="noopener"><b>“Is PI0.5 finetuned by all LIBERO datasets? Success rate of LIBERO-90 is only 18%?”</b></a><br>
+    배포 체크포인트를 <code>libero_90</code>에 돌려본 결과가 <b>18%</b>였다는 보고다. 유지보수자 답변은 달리지 않았다.
+  </div>
+  <div class="gap">
+    <div><div class="t">학습한 4개 스위트</div><div class="v hi">96.9%</div><div class="s">평균</div></div>
+    <div><div class="t">libero_90</div><div class="v lo">18%</div><div class="s">이슈 보고값</div></div>
+    <div><div class="t">차이</div><div class="v">5.4×</div><div class="s">같은 시뮬레이터</div></div>
+  </div>
+  <div class="col">
+    <p><b>같은 시뮬레이터, 같은 로봇, 같은 행동 공간, 같은 카메라다.</b> 바뀐 것은 태스크뿐인데 성적이 5배 넘게 갈린다. 우리가 별도로 확인한 바로는 <code>libero_10</code>의 씬 9개가 전부 <code>libero_90</code>의 20개 씬 안에 들어 있으므로, <b>환경조차 완전히 새롭지 않다.</b></p>
+    <p>즉 96.9%라는 숫자는 모델의 조작 능력이 아니라 <b>학습 범위</b>를 재고 있다. 이것은 부정행위가 아니라 프로토콜의 성격이지만, 결과를 읽을 때 반드시 감안해야 한다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">06</span><h2>이것이 표준인가</h2></div>
+  <div class="col">
+    <p>부분적으로 그렇다. 갈라서 봐야 한다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="desc">항목</th><th class="desc">실태</th></tr></thead>
+      <tbody>
+        <tr><td class="desc"><b>4개 스위트 사용</b></td><td class="desc">사실상 표준. 배포 모델도 논문도 <code>spatial·object·goal·10</code>을 쓴다</td></tr>
+        <tr><td class="desc"><b><code>libero_90</code> 생략</b></td><td class="desc">관행. 원 논문은 <code>LIBERO-90</code>을 사전학습용으로 두었으나 VLA 쪽은 쓰지 않는다</td></tr>
+        <tr><td class="desc"><b>데모 파인튜닝 → 같은 스위트 평가</b></td><td class="desc">표준. 다만 이는 <b>일반화</b>가 아니라 <b>적응 효율</b>을 재는 설정이다</td></tr>
+        <tr><td class="desc"><b>데모 필터링</b></td><td class="desc">흔하지만 <b>기준이 논문마다 다르고 명시가 잘 안 된다.</b> 비교의 큰 오차원</td></tr>
+        <tr><td class="desc"><b>평가 롤아웃 수</b></td><td class="desc">저장소 기본값은 20이나 openpi는 <b>50</b>을 쓴다. 제한 스텝도 기본 600이 아니라 <b>스위트별 220~520</b>이다. 반드시 명시할 것</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p><b>변호할 수 있는 지점이 하나 있다.</b> VLA 모델은 대규모 실로봇 데이터로 사전학습된 상태로 온다. LIBERO 파인튜닝이 재는 것은 "이 모델이 LIBERO를 안다"가 아니라 <b>"새 도메인을 얼마나 적은 데이터로 흡수하는가"</b>다. 그 목적이라면 폐쇄적인 설정이 결함이 아니라 설계다.</p>
+    <p>문제는 그렇게 얻은 숫자가 <b>일반화 성능처럼 제시되는 관행</b>이다. 그리고 96.85%는 이미 <b>포화</b>다 — 상위 모델들이 97~99%에 몰려 있어, 평가 20회로는 모델 간 차이를 구분할 수 없다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">07</span><h2>연구에 쓴다면</h2></div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="desc">할 것</th><th class="desc">이유</th></tr></thead>
+      <tbody>
+        <tr><td class="desc"><b>제로샷 수치를 함께 보고</b></td><td class="desc">파인튜닝 전후를 나란히 두면 사전학습의 기여가 분리된다. 지금 잘 하지 않는 부분</td></tr>
+        <tr><td class="desc"><b><code>libero_90</code>을 홀드아웃 평가로</b></td><td class="desc">배포 모델이 <b>18%</b>다. 천장이 멀어 개선 폭이 드러난다. 4개 스위트는 포화</td></tr>
+        <tr><td class="desc"><b>태스크 홀드아웃 분할</b></td><td class="desc">스위트 내 8개 학습 / 2개 평가 — 태스크 일반화를 직접 측정</td></tr>
+        <tr><td class="desc"><b>데이터 구성을 명시</b></td><td class="desc">"태스크당 50개"인지 필터링본인지 밝히지 않으면 비교가 성립하지 않는다</td></tr>
+        <tr><td class="desc"><b>롤아웃 50회 · 시드 3개</b></td><td class="desc">20회는 5%p 해상도. 포화 구간에서 차이를 주장하려면 부족하다</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p><code>libero_90</code>을 <b>평가 전용</b>으로 쓰면 데모(66 GB)조차 필요 없다. <code>.pruned_init</code> 90개 파일은 저장소에 이미 들어 있고 전부 합쳐 <b>8.8 MB</b>다.</p>
+  </div>
+</section>
+
+<div class="src col">
+  <b>출처</b>
+  <ul>
+    <li><a href="https://github.com/Physical-Intelligence/openpi/issues/734" target="_blank" rel="noopener">openpi Issue #734 — “Is PI0.5 finetuned by all LIBERO datasets? Success rate of LIBERO-90 is only 18%?”</a></li>
+    <li><a href="https://github.com/Physical-Intelligence/openpi/blob/main/src/openpi/training/config.py" target="_blank" rel="noopener">openpi — <code>src/openpi/training/config.py</code></a> (<code>pi05_libero</code> 설정, <code>repo_id</code>)</li>
+    <li><a href="https://github.com/Physical-Intelligence/openpi/blob/main/examples/libero/main.py" target="_blank" rel="noopener">openpi — <code>examples/libero/main.py</code></a> (평가 루프, <code>max_steps</code>, 롤아웃 50)</li>
+    <li><a href="https://github.com/Physical-Intelligence/openpi/blob/main/examples/libero/README.md" target="_blank" rel="noopener">openpi — <code>examples/libero/README.md</code></a> (스위트별 성공률)</li>
+    <li><a href="https://github.com/Physical-Intelligence/openpi/blob/main/examples/libero/convert_libero_data_to_lerobot.py" target="_blank" rel="noopener">openpi — <code>convert_libero_data_to_lerobot.py</code></a> (상류 데이터셋 이름, 무손실 변환 확인)</li>
+    <li><a href="https://huggingface.co/datasets/physical-intelligence/libero" target="_blank" rel="noopener">HuggingFace — <code>physical-intelligence/libero</code></a> (<code>meta/info.json</code>, <code>meta/tasks.jsonl</code>, <code>meta/episodes.jsonl</code>)</li>
+    <li><a href="https://huggingface.co/datasets/openvla/modified_libero_rlds" target="_blank" rel="noopener">HuggingFace — <code>openvla/modified_libero_rlds</code></a> (<code>no_noops</code> 원본, 필터 주체)</li>
+    <li><a href="https://github.com/Lifelong-Robot-Learning/LIBERO" target="_blank" rel="noopener">LIBERO 저장소</a> @ <code>8f1084e</code> — 지시문 대조, <code>.pruned_init</code></li>
+  </ul>
+</div>
+
+<footer>
+  검증: openpi config.py · examples/libero/main.py · HuggingFace physical-intelligence/libero 메타데이터 · examples/libero/README · Issue #734 · LIBERO 저장소 8f1084e 지시문 대조<br>
+  "표준 관행" 판단과 데모 필터링 기준은 공개 문서에서 확인되지 않아 추정이다.
+</footer>
+
+</div>

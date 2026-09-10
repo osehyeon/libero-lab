@@ -1,0 +1,364 @@
+<title>LIBERO 생성 스택</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --ground:#f2f4f5; --panel:#ffffff; --panel-2:#e9edef;
+  --ink:#151c22; --ink-2:#3f4b54; --ink-3:#6b7880;
+  --rule:#d2dade; --rule-2:#bcc7cd;
+  --accent:#0d6b6d; --accent-soft:#d8ebea;
+  --ochre:#9a5b12; --ochre-soft:#f3e6d3;
+  --blue:#1c5f8a; --blue-soft:#dbe8f2;
+  --plum:#6b3f7a; --plum-soft:#ece0f0;
+  --shadow:0 1px 2px rgba(21,28,34,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#101619; --panel:#171f24; --panel-2:#1e282e;
+    --ink:#e7eef1; --ink-2:#b0bfc7; --ink-3:#7e8f99;
+    --rule:#2a363d; --rule-2:#3a4952;
+    --accent:#5cc7c2; --accent-soft:#16332f;
+    --ochre:#d99b4e; --ochre-soft:#33260f;
+    --blue:#6fb5df; --blue-soft:#14293a;
+    --plum:#c295d3; --plum-soft:#2b1e31;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101619; --panel:#171f24; --panel-2:#1e282e;
+  --ink:#e7eef1; --ink-2:#b0bfc7; --ink-3:#7e8f99;
+  --rule:#2a363d; --rule-2:#3a4952;
+  --accent:#5cc7c2; --accent-soft:#16332f;
+  --ochre:#d99b4e; --ochre-soft:#33260f;
+  --blue:#6fb5df; --blue-soft:#14293a;
+  --plum:#c295d3; --plum-soft:#2b1e31;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
+  font-size:16.5px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:54px 28px 92px}
+.col{max-width:700px}
+h1,h2{font-family:Archivo,"Helvetica Neue",Arial,sans-serif;text-wrap:balance}
+h1{font-size:2.4rem;line-height:1.1;letter-spacing:-.022em;font-weight:700;margin:0 0 14px}
+h2{font-size:1.4rem;line-height:1.2;letter-spacing:-.014em;font-weight:600;margin:0}
+p{margin:0 0 16px}
+.mono,code,pre{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace}
+code{font-size:.86em;background:var(--panel-2);padding:.12em .38em;border-radius:3px;color:var(--ink)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+.lede{font-size:1.12rem;color:var(--ink-2);margin:0 0 8px}
+header{border-bottom:1px solid var(--rule);padding-bottom:30px}
+section{padding-top:44px}
+.sechead{display:flex;align-items:baseline;gap:14px;margin-bottom:20px}
+.sechead .num{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--accent);
+  border:1px solid var(--rule-2);border-radius:3px;padding:2px 7px;flex:none}
+
+/* 계층 지도 */
+.stack{display:grid;gap:0;margin:0 0 26px}
+.layer{border:1px solid var(--rule);border-radius:6px;background:var(--panel);
+  box-shadow:var(--shadow);padding:16px 18px}
+.layer .hd{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px;margin-bottom:12px}
+.layer .step{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);border:1px solid var(--rule-2);
+  border-radius:3px;padding:2px 7px;flex:none}
+.layer .nm{font-family:Archivo,sans-serif;font-weight:600;font-size:1.05rem}
+.layer .out{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--ink-3);margin-left:auto}
+.libs{display:grid;gap:8px}
+.lib{display:grid;grid-template-columns:minmax(140px,auto) 1fr;gap:6px 16px;
+  align-items:baseline;padding:9px 12px;border-radius:4px;background:var(--panel-2)}
+.lib .n{font-family:"IBM Plex Mono",monospace;font-size:.85rem;font-weight:600}
+.lib .r{font-size:.92rem;color:var(--ink-2);line-height:1.55}
+@media (max-width:640px){ .lib{grid-template-columns:1fr} }
+
+.layer.define{border-left:3px solid var(--plum)}
+.layer.define .n{color:var(--plum)}
+.layer.assemble{border-left:3px solid var(--accent)}
+.layer.assemble .n{color:var(--accent)}
+.layer.physics{border-left:3px solid var(--blue)}
+.layer.physics .n{color:var(--blue)}
+.layer.collect{border-left:3px solid var(--ochre)}
+.layer.collect .n{color:var(--ochre)}
+.layer.store{border-left:3px solid var(--ink-3)}
+
+.flow{justify-self:center;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;
+  font-size:.8rem;padding:9px 0;line-height:1.3;text-align:center}
+.flow b{color:var(--accent);font-weight:500}
+
+pre{background:var(--panel);border:1px solid var(--rule);border-left:2px solid var(--accent);
+  padding:18px 20px;overflow-x:auto;font-size:.82rem;line-height:1.7;
+  margin:0 0 18px;border-radius:0 4px 4px 0}
+pre .c{color:var(--ink-3)} pre .k{color:var(--accent)} pre .o{color:var(--ochre)}
+.tablewrap{overflow-x:auto;margin:0 0 20px;border:1px solid var(--rule);
+  border-radius:4px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--rule);white-space:nowrap}
+thead th{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500;background:var(--panel-2)}
+tbody tr:last-child td{border-bottom:0}
+td.desc{white-space:normal}
+.note{border-left:2px solid var(--ochre);background:var(--ochre-soft);
+  padding:16px 20px;margin:0 0 20px;border-radius:0 4px 4px 0;font-size:.97rem;line-height:1.7}
+.note b.lbl{font-family:Archivo,sans-serif;font-size:.8rem;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ochre);display:block;margin-bottom:5px}
+.tree{background:var(--panel);border:1px solid var(--rule);border-radius:6px;
+  padding:22px 24px;overflow-x:auto;margin:0 0 20px;box-shadow:var(--shadow)}
+.tree ul{list-style:none;margin:0;padding:0 0 0 22px;position:relative}
+.tree > ul{padding-left:0}
+.tree li{position:relative;padding:4px 0 4px 0;line-height:1.5}
+.tree ul ul li::before{content:"";position:absolute;left:-14px;top:0;bottom:0;
+  border-left:1px solid var(--rule-2)}
+.tree ul ul li:last-child::before{bottom:calc(100% - 17px)}
+.tree ul ul li::after{content:"";position:absolute;left:-14px;top:16px;width:11px;
+  border-top:1px solid var(--rule-2)}
+.tree .nm{font-family:"IBM Plex Mono",monospace;font-size:.9rem;font-weight:600;color:var(--ink)}
+.tree .rl{font-size:.86rem;color:var(--ink-3);margin-left:10px}
+.tree .g1 > .nm{color:var(--accent)}
+.tree .g2 > .nm{color:var(--blue)}
+.tree .g3 > .nm{color:var(--plum)}
+.tree .leaf > .nm{font-weight:500;color:var(--ink-2);font-size:.85rem}
+.key{background:var(--accent-soft);padding:.08em .3em;border-radius:2px}
+footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);
+  font-size:.82rem;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">LIBERO 8f1084e · 생성 스크립트 임포트 실측</p>
+  <h1>LIBERO 생성 스택</h1>
+  <p class="lede col">태스크 정의부터 hdf5 파일까지, <b>어떤 라이브러리가 어느 단계에서 무엇을 맡는지</b> 정리했다. LIBERO 자체는 얇은 층이고, 대부분의 일은 아래 계층이 한다.</p>
+</header>
+
+<section>
+  <div class="sechead"><span class="num">01</span><h2>계층 지도</h2></div>
+
+  <div class="stack">
+    <div class="layer define">
+      <div class="hd"><span class="step">1 · 정의</span><span class="nm">태스크를 글로 쓴다</span><span class="out">→ <code>.bddl</code></span></div>
+      <div class="libs">
+        <div class="lib"><span class="n">LIBERO<br>task_generation_utils</span><span class="r">사람이 쓴 <code>(술어, 물체, 영역)</code> 튜플을 받아 bddl 텍스트로 출력. <b>의존성이 <code>numpy</code>와 <code>os</code>뿐</b>인 순수 파이썬 층이다.</span></div>
+        <div class="lib"><span class="n">LIBERO<br>mu_utils</span><span class="r">씬 템플릿 — 어떤 가구·물체가 놓인 방인지, 영역(<code>:regions</code>)의 중심과 크기를 정의</span></div>
+        <div class="lib"><span class="n">bddl</span><span class="r">태스크 정의 언어. LIBERO는 이 패키지에서 <b><code>bddl.parsing</code> 하나만</b> 쓴다 — bddl 파일을 읽어 구조체로 바꾸는 파서다</span></div>
+      </div>
+    </div>
+
+    <div class="flow">↓ &nbsp;bddl 파일이 씬으로 조립된다</div>
+
+    <div class="layer assemble">
+      <div class="hd"><span class="step">2 · 조립</span><span class="nm">씬과 로봇을 세운다</span><span class="out">→ 실행 가능한 환경</span></div>
+      <div class="libs">
+        <div class="lib"><span class="n">LIBERO<br>envs/</span><span class="r">bddl을 읽어 물체를 배치하고, <b>성공 술어를 등록</b>한다(<code>On</code>·<code>In</code>·<code>Open</code>·<code>TurnOn</code> 등 8개). 매 스텝 <code>_check_success()</code>를 평가하는 층</span></div>
+        <div class="lib"><span class="n">robosuite</span><span class="r"><b>가장 많은 일을 한다.</b> Franka Panda 모델, OSC 컨트롤러(행동 7 → 토크 9), 카메라 설정, gym 형태의 <code>step/reset</code> API. LIBERO 소스에서 <b>임포트 59회</b>로 압도적 1위</span></div>
+      </div>
+    </div>
+
+    <div class="flow">↓ &nbsp;robosuite 가 MuJoCo 를 감싼다</div>
+
+    <div class="layer physics">
+      <div class="hd"><span class="step">3 · 물리</span><span class="nm">실제로 계산한다</span><span class="out">→ 상태 · 접촉 · 이미지</span></div>
+      <div class="libs">
+        <div class="lib"><span class="n">MuJoCo</span><span class="r">강체 동역학, 충돌 검출, 접촉력 풀이. LIBERO가 <b>직접 임포트하는 곳은 단 한 군데</b> — robosuite가 전부 감싸고 있다</span></div>
+        <div class="lib"><span class="n">OpenGL<br>CGL · EGL</span><span class="r">렌더 컨텍스트. macOS는 CGL, 리눅스 서버는 EGL. 이미지가 필요할 때만 관여한다</span></div>
+        <div class="lib"><span class="n">numpy</span><span class="r">모든 배열의 공통 화폐. 상태·행동·이미지가 전부 <code>ndarray</code></span></div>
+      </div>
+    </div>
+
+    <div class="flow">↓ &nbsp;사람이 조종하고, 그 결과를 받아 적는다</div>
+
+    <div class="layer collect">
+      <div class="hd"><span class="step">4 · 수집</span><span class="nm">사람이 시연한다</span><span class="out">→ states + actions</span></div>
+      <div class="libs">
+        <div class="lib"><span class="n">robosuite<br>input_utils</span><span class="r"><b>3D 마우스(SpaceMouse)</b> 또는 키보드 입력을 7차원 행동으로 변환. <code>collect_demonstration.py</code>의 기본 장치는 <code>spacemouse</code>다</span></div>
+        <div class="lib"><span class="n">robosuite<br>DataCollectionWrapper</span><span class="r">환경을 감싸 <b>매 스텝의 상태와 행동을 자동 기록</b>. 시연자는 조종만 하면 된다</span></div>
+        <div class="lib"><span class="n">h5py</span><span class="r">기록을 hdf5로 저장. 이 단계에서는 <b>이미지가 없다</b> — 상태·행동·씬 XML만 담긴다</span></div>
+      </div>
+    </div>
+
+    <div class="flow">↓ &nbsp;저장된 상태를 <b>다시 재생</b>하며 카메라를 찍는다</div>
+
+    <div class="layer store">
+      <div class="hd"><span class="step">5 · 후처리</span><span class="nm">이미지를 입힌다</span><span class="out">→ <code>_demo.hdf5</code></span></div>
+      <div class="libs">
+        <div class="lib"><span class="n">LIBERO<br>create_dataset.py</span><span class="r"><code>set_state_from_flattened(states[i])</code>로 한 스텝씩 되살리고 그 시점의 카메라를 렌더. <b>관측을 사후에 생성</b>하는 단계</span></div>
+        <div class="lib"><span class="n">robosuite<br>camera_utils</span><span class="r">카메라 내·외부 행렬. 깊이 맵을 실제 거리로 바꾸는 변환도 여기</span></div>
+        <div class="lib"><span class="n">OpenCV · Pillow</span><span class="r">이미지 크기 조정·저장</span></div>
+        <div class="lib"><span class="n">h5py</span><span class="r">최종 데이터셋 기록 — <code>actions</code>, <code>states</code>, <code>obs/*_rgb</code>, <code>rewards</code>, <code>dones</code></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">02</span><h2>수집과 렌더링이 분리되어 있다</h2></div>
+  <div class="col">
+    <p>이 스택에서 가장 중요한 설계 결정이다. <b>사람이 시연할 때는 이미지를 저장하지 않는다.</b></p>
+  </div>
+<pre><span class="c"># 4단계 — 수집이 남기는 것</span>
+model_file   <span class="c"># 씬의 MuJoCo XML 전문</span>
+states       <span class="c"># 매 스텝의 물리 상태</span>
+actions      <span class="c"># 사람이 넣은 7차원 행동</span>
+             <span class="o"># 이미지 없음</span>
+
+<span class="c"># 5단계 — 후처리가 이미지를 만든다</span>
+env.sim.<span class="k">set_state_from_flattened</span>(states[i])
+env.sim.<span class="k">forward</span>()
+obs[<span class="o">"agentview_image"</span>]        <span class="c"># 이 시점에 비로소 렌더</span></pre>
+  <div class="col">
+    <p><b>결과가 세 가지다.</b></p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="desc">함의</th><th class="desc">근거</th></tr></thead>
+      <tbody>
+        <tr><td class="desc"><b>시연이 가볍다</b> — 조종 중에 렌더링 부담이 없다</td><td class="desc">수집 단계는 물리만 돌린다</td></tr>
+        <tr><td class="desc"><b>해상도·카메라를 나중에 바꿀 수 있다</b></td><td class="desc">OpenVLA가 원본 128²를 <b>256²로 다시 뽑은</b> 것이 이 구조 덕이다</td></tr>
+        <tr><td class="desc"><b>데이터셋이 커진 원인이기도 하다</b></td><td class="desc">상태·행동은 스텝당 수백 바이트지만, 사후 렌더한 이미지 2장이 <b>98 KB</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p>이 재생이 성립하는 이유는 <code>states</code>가 <b>MuJoCo 상태 그 자체</b>이기 때문이다. 주입하면 접촉과 물체 위치까지 그대로 복원되므로, 몇 번을 다시 렌더해도 같은 장면이 나온다.</p>
+  </div>
+</section>
+
+
+<section>
+  <div class="sechead"><span class="num">03</span><h2>누가 누구의 종속성인가</h2></div>
+  <div class="col">
+    <p>계층이 위아래로 놓인다고 해서 <b>패키지가 서로를 선언하고 있다는 뜻은 아니다.</b> 설치된 배포 메타데이터에서 <code>Requires-Dist</code>를 그대로 뽑으면 이렇다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>패키지</th><th class="desc">선언된 의존성</th></tr></thead>
+      <tbody>
+        <tr><td><code>libero</code> 0.1.0</td><td class="desc"><b style="color:var(--ochre)">없음</b> — <code>setup.py</code>의 <code>install_requires=[]</code></td></tr>
+        <tr><td><code>robosuite</code> 1.4.1</td><td class="desc"><code>mujoco</code> · numpy · numba · opencv-python · pillow · pynput · scipy · termcolor</td></tr>
+        <tr><td><code>mujoco</code> 2.3.7</td><td class="desc">absl-py · glfw · numpy · pyopengl</td></tr>
+        <tr><td><code>bddl</code> 1.0.1</td><td class="desc">networkx · numpy · jupytext · pytest</td></tr>
+        <tr><td><code>robomimic</code> 0.3.0</td><td class="desc">torch · h5py · imageio · <code>egl_probe</code> · tensorboard · matplotlib · tqdm</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p>이를 의존 관계로 펼치면 이렇게 된다. 실제로 <b>두 갈래로 완전히 갈린다.</b></p>
+  </div>
+  <div class="tree">
+    <ul>
+      <li><span class="nm">libero</span><span class="rl">— 벤치마크</span>
+        <ul>
+          <li class="g1"><span class="nm">libero/libero</span><span class="rl">시뮬레이터 층</span>
+            <ul>
+              <li class="g2"><span class="nm">robosuite</span><span class="rl">로봇 · 컨트롤러 · 카메라 · API</span>
+                <ul>
+                  <li class="g2"><span class="nm">mujoco</span><span class="rl">물리 · 충돌 · 렌더</span>
+                    <ul>
+                      <li class="leaf"><span class="nm">glfw</span><span class="rl">창 · GL 컨텍스트</span></li>
+                      <li class="leaf"><span class="nm">pyopengl</span><span class="rl">OpenGL 바인딩</span></li>
+                      <li class="leaf"><span class="nm">absl-py</span></li>
+                    </ul>
+                  </li>
+                  <li class="leaf"><span class="nm">numba</span><span class="rl">수치 가속</span></li>
+                  <li class="leaf"><span class="nm">opencv-python</span><span class="rl">이미지 처리</span></li>
+                  <li class="leaf"><span class="nm">scipy</span> · <span class="nm">pillow</span> · <span class="nm">pynput</span><span class="rl">입력 장치</span></li>
+                </ul>
+              </li>
+              <li class="g3"><span class="nm">bddl</span><span class="rl">태스크 정의 언어 파서</span>
+                <ul>
+                  <li class="leaf"><span class="nm">networkx</span><span class="rl">논리식 그래프</span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li class="g1"><span class="nm">libero/lifelong</span><span class="rl">학습 층 — 시뮬레이터와 공유하는 것이 거의 없다</span>
+            <ul>
+              <li class="g2"><span class="nm">torch</span><span class="rl">신경망</span></li>
+              <li class="g2"><span class="nm">robomimic</span><span class="rl">모방학습 알고리즘 · 데이터 유틸</span>
+                <ul>
+                  <li class="leaf"><span class="nm">h5py</span><span class="rl">hdf5 입출력</span></li>
+                  <li class="leaf"><span class="nm">egl_probe</span><span class="rl">Linux 전용 — macOS 설치 실패 지점</span></li>
+                  <li class="leaf"><span class="nm">tensorboard</span> · <span class="nm">imageio</span> · <span class="nm">matplotlib</span></li>
+                </ul>
+              </li>
+              <li class="leaf"><span class="nm">hydra-core</span><span class="rl">설정</span> · <span class="nm">transformers</span><span class="rl">지시문 임베딩</span> · <span class="nm">wandb</span></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);
+      font-size:.85rem;color:var(--ink-3);font-family:'IBM Plex Mono',monospace">
+      numpy — 위 거의 모든 노드가 공통으로 의존
+    </div>
+  </div>
+
+  <div class="col">
+    <p><b>두 갈래가 만나지 않는다.</b> 왼쪽은 robosuite/MuJoCo, 오른쪽은 PyTorch로, <code>numpy</code> 말고는 공유하는 것이 없다. 그래서 시뮬레이터만 쓸 거라면 오른쪽 가지는 통째로 설치하지 않아도 된다 — 이 세션에서 <code>robomimic</code>을 <code>--no-deps</code>로 넣고도 모든 실험이 돌아간 이유다.</p>
+  </div>
+
+  <div class="note col">
+    <b class="lbl">그래서 설치가 번거롭다</b>
+    <code>pip install -e LIBERO</code>가 <b>아무것도 끌어오지 않는다.</b> robosuite·bddl·mujoco를 전부 손으로 깔아야 하고, 버전 범위도 선언되어 있지 않아 <b>충돌을 아무도 막아주지 않는다</b> — robosuite 1.4는 MuJoCo 2.3 API 기준인데 최신 mujoco를 설치하면 그대로 깨진다.
+    <br><br>
+    <code>robomimic → egl_probe</code>도 함정이다. <code>egl_probe</code>는 <b>Linux 전용</b>인데 무조건 요구하도록 선언되어 있어, macOS에서는 <code>--no-deps</code>로 우회해야 한다.
+  </div>
+
+  <div class="col">
+    <p>정리하면 <b>제대로 선언된 사슬은 <code>robosuite → mujoco</code> 하나뿐</b>이고, 위쪽 연결은 전부 임포트로만 존재한다. 계층 지도의 화살표를 패키지 관리자가 알지 못한다는 뜻이다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">04</span><h2>누가 실제로 일하는가</h2></div>
+  <div class="col">
+    <p>LIBERO 소스의 임포트를 세어보면 무게중심이 분명하다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>라이브러리</th><th class="desc">LIBERO가 쓰는 방식</th></tr></thead>
+      <tbody>
+        <tr><td><b>robosuite</b> · 59회</td><td class="desc">사실상 본체. 로봇·컨트롤러·카메라·API 전부</td></tr>
+        <tr><td><b>MuJoCo</b> · 1회</td><td class="desc">robosuite에 가려져 거의 보이지 않는다</td></tr>
+        <tr><td><b>bddl</b> · 1개 모듈</td><td class="desc"><code>bddl.parsing</code>만. 파서 이상은 쓰지 않는다</td></tr>
+        <tr><td><b>h5py · OpenCV · Pillow</b></td><td class="desc">저장과 이미지 처리. 물리와 무관</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note col">
+    <b class="lbl">LIBERO의 기여는 코드가 아니다</b>
+    스택의 어느 층도 LIBERO가 새로 만든 것이 아니다. 이 프로젝트가 더한 것은 <b>130개 태스크 정의 · 6,500개 인간 시연 · 통제된 실험 설계</b>다. 코드는 기존 라이브러리를 엮은 얇은 층이고, 그래서 <code>libero/libero</code>와 <code>libero/lifelong</code>이 서로 다른 스택 위에 앉아 있다 — 앞의 것은 robosuite, 뒤의 것은 PyTorch다.
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">05</span><h2>새 태스크를 만든다면</h2></div>
+  <div class="col">
+    <p>계층을 알면 어디를 건드릴지가 분명해진다.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="desc">하고 싶은 것</th><th>건드릴 층</th><th class="desc">비용</th></tr></thead>
+      <tbody>
+        <tr><td class="desc">새 태스크 (기존 술어 조합)</td><td>1 정의</td><td class="desc">bddl 파일 1개 · Python 불필요</td></tr>
+        <tr><td class="desc">새 성공 조건</td><td>2 조립</td><td class="desc">술어 클래스 추가 — <code>predicates/</code></td></tr>
+        <tr><td class="desc">새 물체·씬</td><td>1 정의 + assets</td><td class="desc">메시 추가 후 씬 템플릿 등록</td></tr>
+        <tr><td class="desc">새 로봇·컨트롤러</td><td>2 조립 (robosuite)</td><td class="desc">LIBERO 밖 — robosuite 쪽 작업</td></tr>
+        <tr><td class="desc">해상도·카메라 변경</td><td>5 후처리</td><td class="desc"><b>재수집 불필요</b> — 저장된 상태로 다시 렌더</td></tr>
+        <tr><td class="desc">데모 확보</td><td>4 수집</td><td class="desc"><b>사람이 3D 마우스로 50회</b> — 진짜 병목</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p>마지막 줄만 자동화가 안 된다. 나머지는 전부 파일을 쓰거나 함수를 더하는 일이다.</p>
+  </div>
+</section>
+
+<footer>
+  근거: <code>scripts/collect_demonstration.py</code> · <code>scripts/create_dataset.py</code> · <code>scripts/create_libero_task_example.py</code> 임포트 및 본문 · <code>libero/</code> 전체 임포트 집계 · LIBERO @ 8f1084e
+</footer>
+
+</div>
