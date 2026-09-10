@@ -76,6 +76,7 @@ All still present upstream. Check here first when something breaks.
 | `run_demo.py` | no | `--list`, `--gui`, `--video`. Random actions at line 52 |
 | `teleop.py` | no | Manual control, nothing recorded. Defaults to `libero_goal` 5 -- push the plate, the easiest task: one `On` condition, no grasping |
 | `replay_demo.py` | yes | `--mode states\|actions` |
+| `download_datasets.py` | -- | Names each suite, so `libero_90` is not skipped |
 
 `teleop.py` wraps the env in `VisualizationWrapper` so gripper site markers show,
 matching `scripts/collect_demonstration.py`. The unwrapped env is kept as `raw`

@@ -24,6 +24,7 @@ cd libero-lab && ./setup.sh
 | `run_demo.py` | List tasks, run with GUI, save video |
 | `teleop.py` | Drive a task by hand, nothing recorded |
 | `replay_demo.py` | Replay human demos (needs the dataset) |
+| `download_datasets.py` | Fetch the 94 GB demo datasets |
 | `docs/` | HTML write-ups on task structure, MuJoCo I/O, rotations, VLA practice |
 | `CLAUDE.md` | Working notes — bug list, measured facts, next steps |
 
@@ -76,7 +77,15 @@ final hdf5.
 ## Datasets
 
 **Not needed for evaluation.** Initial states (`.pruned_init`) ship with the
-LIBERO repo and total 13 MB. The 100 GB of demos is only for training.
+LIBERO repo and total 13 MB. The 94 GB of demos is only for training and replay.
+
+```bash
+.venv/bin/python download_datasets.py                       # all 5 suites, 94 GB
+.venv/bin/python download_datasets.py --suite libero_spatial
+```
+
+Do not use LIBERO's own `--datasets all`: it looks for a `libero_100` directory
+that is not on HuggingFace, fails silently, and leaves out `libero_90`.
 
 ## License
 

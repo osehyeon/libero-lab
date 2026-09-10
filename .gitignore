@@ -1,11 +1,19 @@
-# 파이썬 환경 (1.8 GB)
+# python env (1.8 GB)
 .venv/
 __pycache__/
 *.pyc
 
-# 데이터셋 (100 GB) 및 수집 산출물
+# datasets (94 GB) and collection output
 datasets/
 demonstration_data/
+
+# run output
+replays/
+runs/
+*.mp4
+*.png
+!panda_joints.png
+!ref/*.jpg
 
 # macOS
 .DS_Store
