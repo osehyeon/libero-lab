@@ -69,6 +69,18 @@ All still present upstream. Check here first when something breaks.
 - Same checkpoint scores **18%** on `libero_90` ([openpi #734](https://github.com/Physical-Intelligence/openpi/issues/734))
 - Eval config: **50 rollouts** per task (not the repo default 20), `max_steps` **220–520** per suite (not 600) — roughly the longest training demo + 10%
 
+## Scripts
+
+| Script | Needs dataset | Note |
+|---|---|---|
+| `run_demo.py` | no | `--list`, `--gui`, `--video`. Random actions at line 52 |
+| `teleop.py` | no | Manual control, nothing recorded. Defaults to `libero_goal` 5 -- push the plate, the easiest task: one `On` condition, no grasping |
+| `replay_demo.py` | yes | `--mode states\|actions` |
+
+`teleop.py` wraps the env in `VisualizationWrapper` so gripper site markers show,
+matching `scripts/collect_demonstration.py`. The unwrapped env is kept as `raw`
+for `sim`, `robots[0]` and `_check_success()`.
+
 ## Conventions
 
 - Commit messages: one line, English, no body, no trailers
