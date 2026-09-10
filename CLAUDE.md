@@ -60,6 +60,7 @@ All still present upstream. Check here first when something breaks.
 - Action 7 → OSC → `d.ctrl` 9 (7 torques + 2 finger positions). **No inverse kinematics**: `τ = JᵀF + gravity comp`
 - State 92 = `1 + qpos 48 + qvel 43`, but that is **`libero_spatial` only**. Across 130 tasks: 45–123
 - In `qvel`, **only angular velocity is in body frame**; the rest is world frame. Inertia is constant in the body frame
+- Replay reads only `states` and `actions`: 4 MB per task. The 485 MB hdf5 is ~98% camera images
 - Physics is fully deterministic (re-run difference `0.000e+00`). Failures come from contact discontinuities
 
 ### VLA practice (verified on π₀)
@@ -76,8 +77,12 @@ All still present upstream. Check here first when something breaks.
 |---|---|---|
 | `run_demo.py` | no | `--list`, `--gui`, `--video`. Random actions at line 52 |
 | `teleop.py` | no | Manual control, nothing recorded. Defaults to `libero_goal` 5 -- push the plate, the easiest task: one `On` condition, no grasping |
-| `replay_demo.py` | yes | `--mode states\|actions` |
+| `replay_demo.py` | yes | `--gui` for a live window, otherwise mp4. `--mode states\|actions` |
 | `download_datasets.py` | -- | Names each suite, so `libero_90` is not skipped |
+
+`ControlEnv` accepts `has_renderer=True` but is not re-exported by
+`libero/libero/envs/__init__.py` -- import it from `env_wrapper` directly.
+`OffScreenRenderEnv` and `DemoRenderEnv` both force `has_renderer=False`.
 
 `teleop.py` wraps the env in `VisualizationWrapper` so gripper site markers show,
 matching `scripts/collect_demonstration.py`. The unwrapped env is kept as `raw`

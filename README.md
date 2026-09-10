@@ -23,7 +23,7 @@ cd libero-lab && ./setup.sh
 | `patches/` | Source fixes for LIBERO — a submodule cannot carry local edits |
 | `run_demo.py` | List tasks, run with GUI, save video |
 | `teleop.py` | Drive a task by hand, nothing recorded |
-| `replay_demo.py` | Replay human demos (needs the dataset) |
+| `replay_demo.py` | Watch a recorded human demo -- the ground truth |
 | `download_datasets.py` | Fetch the 94 GB demo datasets |
 | `docs/` | HTML write-ups on task structure, MuJoCo I/O, rotations, VLA practice |
 | `CLAUDE.md` | Working notes — bug list, measured facts, next steps |
@@ -54,6 +54,26 @@ Add `--device spacemouse` for a 3D mouse (`pip install hidapi` first).
 
 On macOS, add your terminal under **System Settings → Privacy & Security →
 Accessibility**, then restart it. Without this the window opens but keys do nothing.
+
+## Watch the ground truth
+
+Every task ships with 50 recorded human demos. Replay one in a window:
+
+```bash
+.venv/bin/python replay_demo.py --gui                    # exact reproduction
+.venv/bin/python replay_demo.py --gui --mode actions     # re-run through the controller
+.venv/bin/python replay_demo.py --gui --loop --fps 40    # faster, on repeat
+```
+
+| Mode | |
+|---|---|
+| `states` | Inject the stored physics state each step. Always exact |
+| `actions` | Feed the stored actions back through OSC. Error accumulates, so it can fail |
+
+Without `--gui` it writes an mp4 to `runs/` instead.
+
+Needs the dataset for that suite. Only `states` and `actions` are read -- 4 MB per
+task; the 485 MB on disk is almost entirely recorded camera images.
 
 ## Collect your own demos
 
