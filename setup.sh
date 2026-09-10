@@ -10,7 +10,11 @@ echo "[1/5] LIBERO submodule"
 git submodule update --init --depth 1 LIBERO
 
 echo "[2/5] Python 3.10 virtualenv"
-command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
+if ! command -v uv >/dev/null; then
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  # the installer drops uv here but only edits interactive shell profiles
+  export PATH="$HOME/.local/bin:$PATH"
+fi
 uv venv --python 3.10 .venv
 
 echo "[3/5] Dependencies"
