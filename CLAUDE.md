@@ -17,7 +17,7 @@ A submodule tracks only an upstream commit, so **local edits must live in
 |---|---|---|
 | Render backend | CGL | EGL (`MUJOCO_GL=egl`) |
 | Speed | 22.6 steps/sec | 118.7 steps/sec |
-| Path | `~/Desktop/libero` | `~/libero` |
+| Path | `~/Desktop/libero-lab` | `~/libero` |
 | Datasets | none | 94 GB, all 5 suites, in `datasets/` |
 
 Both machines run this same repo. Heavy runs go on the server (`ssh 5090`),
