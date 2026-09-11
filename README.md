@@ -65,6 +65,19 @@ and the fingers need about 100 steps to close, so press it once and wait a few s
 
 Add `--device spacemouse` for a 3D mouse (`pip install hidapi` first).
 
+`--plus` drives a LIBERO-Plus task instead. It has thousands per suite, so name
+one by what was perturbed rather than by index:
+
+```bash
+python teleop.py --plus --category "Camera Viewpoints" --level 5
+python teleop.py --plus --category "Robot Initial States" --level 5
+python teleop.py --plus --suite libero_10 --category "Objects Layout" --nth 3
+```
+
+It prints how many tasks matched and takes `--nth` of them (default 0). Driving
+a perturbation by hand is the quickest way to find out whether it is solvable at
+all, which a success rate does not tell you.
+
 On macOS, add your terminal under **System Settings → Privacy & Security →
 Accessibility**, then restart it. Without this the window opens but keys do nothing.
 

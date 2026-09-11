@@ -87,7 +87,7 @@ All still present upstream. Check here first when something breaks.
 | Script | Needs dataset | Note |
 |---|---|---|
 | `run_demo.py` | no | `--list`, `--gui`, `--video`. Random actions at line 52 |
-| `teleop.py` | no | Manual control, nothing recorded. Defaults to `libero_goal` 5 -- push the plate, the easiest task: one `On` condition, no grasping |
+| `teleop.py` | no | Manual control, nothing recorded. Defaults to `libero_goal` 5 -- push the plate, the easiest task: one `On` condition, no grasping. `--plus` switches to LIBERO-Plus, picking a task by `--category`/`--level`/`--nth` |
 | `replay_demo.py` | yes | `--gui` for a live window, otherwise mp4. `--mode states\|actions` |
 | `download_datasets.py` | -- | Names each suite, so `libero_90` is not skipped |
 | `plus_demo.py` | no | LIBERO-Plus only |
@@ -126,6 +126,15 @@ Counts verified locally: spatial 2402, object 2518, goal 2591, `libero_10` 2519.
   (`patches/libero-plus-fixes.patch`)
 - No LICENSE file in the fork. See `patches/NOTICE.md`
 - Written up in `docs/libero-plus/libero-plus.html`, with the 7 axes rendered
+- **1,467 of 2,402 `libero_spatial` bddl files do not exist on disk, by design.**
+  Only `light` / `language` / `add` / `table` / `tb` families are shipped. The
+  camera, robot-pose and noise axes are encoded in the *file name* and parsed by
+  `ControlEnv.__init__`: `..._view_13_15_100_0_0_initstate_231_noise_17` becomes
+  camera params, `robots=["Panda231"]`, and an observation noise level. So build
+  envs through `ControlEnv`, never `TASK_MAPPING` -- the latter skips the parser
+  and dies on a missing .bddl
+- `--plus` has to be read off `sys.argv` before any `libero` import, since it
+  decides which venv to re-exec into. argparse runs far too late
 - Forget `LIBERO_CONFIG_PATH` and `.venv-plus` silently reads `~/.libero`, then
   looks for perturbed bddl files inside the base repo. `plus_demo.py` checks for
   this **before** importing `benchmark` -- LIBERO-plus scans every bddl file at
