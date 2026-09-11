@@ -1,33 +1,43 @@
 # libero-lab
 
 Reproducible setup for the [LIBERO](https://github.com/Lifelong-Robot-Learning/LIBERO)
-benchmark, plus scripts to explore it.
+benchmark and for [LIBERO-Plus](https://github.com/sylvestf/LIBERO-plus)
+(CVPR 2026), plus scripts to explore both.
 
-Upstream has not changed since `8f1084e` (2025-03) and no longer installs cleanly.
-`setup.sh` works around that. Verified on macOS (Apple Silicon) and CUDA Linux.
+Neither installs cleanly any more. `setup.sh` and `setup-plus.sh` work around
+that. Verified on macOS (Apple Silicon) and CUDA Linux.
 
 ## Quickstart
 
 ```bash
 git clone --recursive git@github.com:osehyeon/libero-lab.git
-cd libero-lab && ./setup.sh
+cd libero-lab
+
+./setup.sh                    # base benchmark, 130 tasks
 python run_demo.py --list
 python run_demo.py --suite libero_spatial --task 0 --gui
+
+./setup-plus.sh               # LIBERO-Plus, 10,030 perturbed tasks
+python plus_demo.py --list
 ```
+
+Run the scripts with any python. Each one re-execs itself under the virtualenv
+and config it needs, so there is nothing to activate and no environment
+variable to remember -- see `libero_env.py`.
 
 ## Contents
 
 | Path | |
 |---|---|
-| `setup.sh` | Environment setup, including 8 upstream workarounds |
-| `patches/` | Source fixes for LIBERO — a submodule cannot carry local edits |
+| `setup.sh` | Base environment, including 8 upstream workarounds |
+| `setup-plus.sh` | LIBERO-Plus environment — separate venv, same package name |
+| `patches/` | Source fixes — a submodule cannot carry local edits |
 | `run_demo.py` | List tasks, run with GUI, save video |
 | `teleop.py` | Drive a task by hand, nothing recorded |
 | `replay_demo.py` | Watch a recorded human demo -- the ground truth |
 | `download_datasets.py` | Fetch the 94 GB demo datasets |
-| `libero_env.py` | Sends each script to the right venv and config |
-| `setup-plus.sh` | Second environment for LIBERO-Plus (CVPR 2026 robustness benchmark) |
 | `plus_demo.py` | Browse and render LIBERO-Plus perturbations |
+| `libero_env.py` | Sends each script to the right venv and config |
 | `docs/` | HTML write-ups on task structure, MuJoCo I/O, rotations, VLA practice |
 | `CLAUDE.md` | Working notes — bug list, measured facts, next steps |
 
@@ -69,23 +79,55 @@ It is a fork of LIBERO and ships a package with the same name, `libero`, so it
 gets its own virtualenv and its own config.
 
 ```bash
-./setup-plus.sh                       # .venv-plus + 6.4 GB of assets
-
-python plus_demo.py --list --suite all
-python plus_demo.py --render --category all
-python plus_demo.py --render --category "Camera Viewpoints" --level 5
+./setup-plus.sh    # .venv-plus, plus a 6.4 GB asset download (9.4 GB unpacked)
 ```
 
-Any python will do. Each script calls `libero_env.require()` and re-execs
-itself under the interpreter and config it needs, so there is nothing to
-activate and no environment variable to remember.
+`--list` counts the tasks per perturbation dimension and difficulty level:
 
-The 7 dimensions: objects layout, camera viewpoints, robot initial states,
-language instructions, light conditions, background textures, sensor noise.
+```bash
+python plus_demo.py --list                    # libero_spatial
+python plus_demo.py --list --suite all        # 10,030
+```
 
-`env_wrapper.py` imports `wand` at module level, so ImageMagick must be present
-or nothing runs -- `brew install imagemagick` on macOS (plus `MAGICK_HOME`),
-`apt install libmagickwand-dev` on Linux.
+`--render` picks one task per dimension and saves the initial states side by
+side, so you can see what a perturbation actually does:
+
+```bash
+python plus_demo.py --render --category all
+python plus_demo.py --render --category "Camera Viewpoints" --level 5
+python plus_demo.py --render --suite libero_10 --category "Objects Layout"
+```
+
+| Option | |
+|---|---|
+| `--suite` | `libero_spatial` (default), `libero_object`, `libero_goal`, `libero_10`, `all` |
+| `--category` | one of the 7 below, or `all` (default) |
+| `--level` | difficulty 1-5; `0` (default) takes any |
+| `--out` | image path, default `runs/plus.png` |
+
+The 7 dimensions, with how many tasks each contributes:
+
+| Dimension | Tasks |
+|---|---|
+| Sensor Noise | 1,601 |
+| Camera Viewpoints | 1,599 |
+| Robot Initial States | 1,550 |
+| Language Instructions | 1,537 |
+| Objects Layout | 1,525 |
+| Light Conditions | 1,142 |
+| Background Textures | 1,076 |
+
+Counted from `LIBERO-plus/libero/libero/benchmark/task_classification.json`,
+which is also where a policy evaluation would read each task's dimension and
+level from.
+
+**ImageMagick is required**, not optional: `env_wrapper.py` imports `wand` at
+module level, so `import libero` fails without it. `brew install imagemagick`
+on macOS, `apt install libmagickwand-dev` on Linux. `setup-plus.sh` installs it
+on macOS and warns on Linux, where it needs root.
+
+A survey of LIBERO-Plus and the other successor benchmarks is in
+[docs/libero-successors.md](docs/libero-successors.md).
 
 ## Watch the ground truth
 
@@ -144,6 +186,7 @@ that is not on HuggingFace, fails silently, and leaves out `libero_90`.
 MIT — see [LICENSE](LICENSE). Dependencies are permissive too: LIBERO, robosuite,
 bddl and robomimic are MIT; MuJoCo is Apache 2.0.
 
-`patches/libero-fixes.patch` derives from LIBERO source; see
-[patches/NOTICE.md](patches/NOTICE.md). Images in `ref/` follow
-[ref/SOURCES.md](ref/SOURCES.md).
+The patches in `patches/` derive from LIBERO and LIBERO-plus source; see
+[patches/NOTICE.md](patches/NOTICE.md). Note that **LIBERO-plus ships no LICENSE
+file** -- it is a fork of MIT-licensed LIBERO, but says nothing itself. Images
+in `ref/` follow [ref/SOURCES.md](ref/SOURCES.md).
