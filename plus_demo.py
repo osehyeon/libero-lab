@@ -95,8 +95,12 @@ def main():
             env = OffScreenRenderEnv(bddl_file_name=bddl,
                                      camera_heights=256, camera_widths=256)
             env.reset()
-            obs = env.set_init_state(bench.get_task_init_states(hit)[0])
-            tiles.append(obs["agentview_image"][::-1])
+            env.set_init_state(bench.get_task_init_states(hit)[0])
+            # LIBERO-Plus adds sensor noise only in step() and reset();
+            # set_init_state() hands back a clean image. One hold-still step
+            # gives the observation a policy would actually receive.
+            obs, *_ = env.step(np.array([0, 0, 0, 0, 0, 0, -1.0]))
+            tiles.append(np.asarray(obs["agentview_image"])[::-1])
             labels.append(f"{s} #{hit} {want}")
             env.close()
             print(f"  {want:24s} #{hit}")

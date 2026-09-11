@@ -133,6 +133,11 @@ Counts verified locally: spatial 2402, object 2518, goal 2591, `libero_10` 2519.
   camera params, `robots=["Panda231"]`, and an observation noise level. So build
   envs through `ControlEnv`, never `TASK_MAPPING` -- the latter skips the parser
   and dies on a missing .bddl
+- **Sensor noise is applied only in `ControlEnv.step()` and `reset()`, and only to
+  `agentview_image`.** `set_init_state()` returns a clean frame, and the wrist
+  camera `robot0_eye_in_hand` is never noised. Render after one hold-still
+  `step()` to see what a policy sees. Noise id `M`: 1-10 motion blur, 11-20
+  gaussian, 21-30 zoom, 31-40 fog, 41-50 glass; severity `(M-1)%10+1`
 - `--plus` has to be read off `sys.argv` before any `libero` import, since it
   decides which venv to re-exec into. argparse runs far too late
 - Forget `LIBERO_CONFIG_PATH` and `.venv-plus` silently reads `~/.libero`, then
