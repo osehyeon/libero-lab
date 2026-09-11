@@ -14,6 +14,9 @@ Keys (keyboard device):
 On macOS the terminal needs Accessibility permission, otherwise the window
 opens but keys do nothing. System Settings > Privacy & Security > Accessibility.
 """
+import libero_env
+libero_env.require("base")      # re-execs under .venv if needed
+
 import argparse
 
 import numpy as np

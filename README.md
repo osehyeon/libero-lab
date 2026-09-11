@@ -11,8 +11,8 @@ Upstream has not changed since `8f1084e` (2025-03) and no longer installs cleanl
 ```bash
 git clone --recursive git@github.com:osehyeon/libero-lab.git
 cd libero-lab && ./setup.sh
-.venv/bin/python run_demo.py --list
-.venv/bin/python run_demo.py --suite libero_spatial --task 0 --gui
+python run_demo.py --list
+python run_demo.py --suite libero_spatial --task 0 --gui
 ```
 
 ## Contents
@@ -25,6 +25,7 @@ cd libero-lab && ./setup.sh
 | `teleop.py` | Drive a task by hand, nothing recorded |
 | `replay_demo.py` | Watch a recorded human demo -- the ground truth |
 | `download_datasets.py` | Fetch the 94 GB demo datasets |
+| `libero_env.py` | Sends each script to the right venv and config |
 | `setup-plus.sh` | Second environment for LIBERO-Plus (CVPR 2026 robustness benchmark) |
 | `plus_demo.py` | Browse and render LIBERO-Plus perturbations |
 | `docs/` | HTML write-ups on task structure, MuJoCo I/O, rotations, VLA practice |
@@ -35,9 +36,9 @@ cd libero-lab && ./setup.sh
 Control a task by hand. Nothing is recorded.
 
 ```bash
-.venv/bin/python teleop.py                                   # push the plate to the front of the stove
-.venv/bin/python teleop.py --suite libero_goal --task 7      # turn on the stove
-.venv/bin/python teleop.py --suite libero_spatial --task 0   # pick and place
+python teleop.py                                   # push the plate to the front of the stove
+python teleop.py --suite libero_goal --task 7      # turn on the stove
+python teleop.py --suite libero_spatial --task 0   # pick and place
 ```
 
 The default is the easiest task in the benchmark: slide the plate with `w a s d`,
@@ -70,13 +71,14 @@ gets its own virtualenv and its own config.
 ```bash
 ./setup-plus.sh                       # .venv-plus + 6.4 GB of assets
 
-export LIBERO_CONFIG_PATH=~/.libero-plus
-export MAGICK_HOME=$(brew --prefix)   # macOS only, see below
-
-.venv-plus/bin/python plus_demo.py --list --suite all
-.venv-plus/bin/python plus_demo.py --render --category all
-.venv-plus/bin/python plus_demo.py --render --category "Camera Viewpoints" --level 5
+python plus_demo.py --list --suite all
+python plus_demo.py --render --category all
+python plus_demo.py --render --category "Camera Viewpoints" --level 5
 ```
+
+Any python will do. Each script calls `libero_env.require()` and re-execs
+itself under the interpreter and config it needs, so there is nothing to
+activate and no environment variable to remember.
 
 The 7 dimensions: objects layout, camera viewpoints, robot initial states,
 language instructions, light conditions, background textures, sensor noise.
@@ -90,9 +92,9 @@ or nothing runs -- `brew install imagemagick` on macOS (plus `MAGICK_HOME`),
 Every task ships with 50 recorded human demos. Replay one in a window:
 
 ```bash
-.venv/bin/python replay_demo.py --gui                    # exact reproduction
-.venv/bin/python replay_demo.py --gui --mode actions     # re-run through the controller
-.venv/bin/python replay_demo.py --gui --loop --fps 40    # faster, on repeat
+python replay_demo.py --gui                    # exact reproduction
+python replay_demo.py --gui --mode actions     # re-run through the controller
+python replay_demo.py --gui --loop --fps 40    # faster, on repeat
 ```
 
 | Mode | |
@@ -130,8 +132,8 @@ final hdf5.
 LIBERO repo and total 13 MB. The 94 GB of demos is only for training and replay.
 
 ```bash
-.venv/bin/python download_datasets.py                       # all 5 suites, 94 GB
-.venv/bin/python download_datasets.py --suite libero_spatial
+python download_datasets.py                       # all 5 suites, 94 GB
+python download_datasets.py --suite libero_spatial
 ```
 
 Do not use LIBERO's own `--datasets all`: it looks for a `libero_100` directory

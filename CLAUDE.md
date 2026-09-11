@@ -90,7 +90,16 @@ All still present upstream. Check here first when something breaks.
 | `teleop.py` | no | Manual control, nothing recorded. Defaults to `libero_goal` 5 -- push the plate, the easiest task: one `On` condition, no grasping |
 | `replay_demo.py` | yes | `--gui` for a live window, otherwise mp4. `--mode states\|actions` |
 | `download_datasets.py` | -- | Names each suite, so `libero_90` is not skipped |
-| `plus_demo.py` | no | LIBERO-Plus only. Needs `.venv-plus` and `LIBERO_CONFIG_PATH` |
+| `plus_demo.py` | no | LIBERO-Plus only |
+
+Every script starts with `libero_env.require("base"|"plus")`, which re-execs it
+under the matching venv with `LIBERO_CONFIG_PATH` (and `MAGICK_HOME` on macOS)
+already set. So `python <script>` works from any interpreter, and the four wrong
+combinations of venv and config cannot be reached. The call has to sit **above**
+every third-party import, since `os.execve` discards whatever loaded first.
+
+Worth knowing why this exists: base venv + plus config used to list 2,402 tasks
+without complaint, then render them with base code. It failed silently.
 
 `ControlEnv` accepts `has_renderer=True` but is not re-exported by
 `libero/libero/envs/__init__.py` -- import it from `env_wrapper` directly.

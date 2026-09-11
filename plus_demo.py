@@ -18,6 +18,9 @@ import collections
 import json
 import os
 
+import libero_env
+libero_env.require("plus")          # re-execs under .venv-plus if needed
+
 import numpy as np
 import imageio.v2 as iio
 
@@ -27,21 +30,6 @@ SUITES = ["libero_spatial", "libero_object", "libero_goal", "libero_10"]
 CATEGORIES = ["Objects Layout", "Camera Viewpoints", "Robot Initial States",
               "Language Instructions", "Light Conditions", "Background Textures",
               "Sensor Noise"]
-
-
-def check_env():
-    """Without LIBERO_CONFIG_PATH the plus venv reads the base config, then
-    hunts for perturbed bddl files inside the base repo and dies on a
-    FileNotFoundError that says nothing about the cause. LIBERO-plus scans
-    every bddl file while `benchmark` is imported, so this has to run first."""
-    root = get_libero_path("benchmark_root")
-    if "LIBERO-plus" not in root:
-        raise SystemExit(
-            f"config points at {root}\n"
-            "that is the base benchmark, not LIBERO-Plus. run:\n"
-            "  export LIBERO_CONFIG_PATH=~/.libero-plus")
-    if not os.path.isdir(get_libero_path("assets")):
-        raise SystemExit("assets are missing. run ./setup-plus.sh")
 
 
 def classification():
@@ -60,7 +48,6 @@ def main():
     p.add_argument("--out", default="runs/plus.png")
     args = p.parse_args()
 
-    check_env()
     global benchmark, OffScreenRenderEnv
     from libero.libero import benchmark
     from libero.libero.envs import OffScreenRenderEnv

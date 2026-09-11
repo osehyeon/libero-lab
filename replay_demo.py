@@ -11,6 +11,9 @@
 Needs the demo dataset. Only `states` and `actions` are read, which is 4 MB per
 task; the 485 MB on disk is almost all recorded camera images.
 """
+import libero_env
+libero_env.require("base")      # re-execs under .venv if needed
+
 import argparse, os, time
 import h5py
 from libero.libero import benchmark, get_libero_path

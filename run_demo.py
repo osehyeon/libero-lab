@@ -6,6 +6,9 @@ Examples:
   python run_demo.py --suite libero_spatial --task 0 --gui
   python run_demo.py --suite libero_object --task 3 --video out.mp4
 """
+import libero_env
+libero_env.require("base")      # re-execs under .venv if needed
+
 import argparse, numpy as np
 
 def main():
