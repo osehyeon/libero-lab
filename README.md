@@ -25,6 +25,8 @@ cd libero-lab && ./setup.sh
 | `teleop.py` | Drive a task by hand, nothing recorded |
 | `replay_demo.py` | Watch a recorded human demo -- the ground truth |
 | `download_datasets.py` | Fetch the 94 GB demo datasets |
+| `setup-plus.sh` | Second environment for LIBERO-Plus (CVPR 2026 robustness benchmark) |
+| `plus_demo.py` | Browse and render LIBERO-Plus perturbations |
 | `docs/` | HTML write-ups on task structure, MuJoCo I/O, rotations, VLA practice |
 | `CLAUDE.md` | Working notes — bug list, measured facts, next steps |
 
@@ -54,6 +56,34 @@ Add `--device spacemouse` for a 3D mouse (`pip install hidapi` first).
 
 On macOS, add your terminal under **System Settings → Privacy & Security →
 Accessibility**, then restart it. Without this the window opens but keys do nothing.
+
+## LIBERO-Plus
+
+[LIBERO-Plus](https://github.com/sylvestf/LIBERO-plus) (CVPR 2026) takes the 4
+original suites and perturbs them along 7 dimensions at 5 difficulty levels:
+10,030 tasks. Released VLA checkpoints score over 90% on plain LIBERO and drop
+below 30% when the camera or the robot's starting pose moves.
+
+It is a fork of LIBERO and ships a package with the same name, `libero`, so it
+gets its own virtualenv and its own config.
+
+```bash
+./setup-plus.sh                       # .venv-plus + 6.4 GB of assets
+
+export LIBERO_CONFIG_PATH=~/.libero-plus
+export MAGICK_HOME=$(brew --prefix)   # macOS only, see below
+
+.venv-plus/bin/python plus_demo.py --list --suite all
+.venv-plus/bin/python plus_demo.py --render --category all
+.venv-plus/bin/python plus_demo.py --render --category "Camera Viewpoints" --level 5
+```
+
+The 7 dimensions: objects layout, camera viewpoints, robot initial states,
+language instructions, light conditions, background textures, sensor noise.
+
+`env_wrapper.py` imports `wand` at module level, so ImageMagick must be present
+or nothing runs -- `brew install imagemagick` on macOS (plus `MAGICK_HOME`),
+`apt install libmagickwand-dev` on Linux.
 
 ## Watch the ground truth
 

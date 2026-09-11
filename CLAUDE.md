@@ -4,8 +4,19 @@ Working notes for this repo. Everything below was measured, not assumed.
 
 ## Layout
 
-`LIBERO/` is a submodule pinned to `8f1084e`. Not committed: `.venv/` (1.8 GB),
-`datasets/` (100 GB), `demonstration_data/`.
+Two submodules, two virtualenvs. `LIBERO/` is pinned to `8f1084e`,
+`LIBERO-plus/` to `4976dc3`. They ship packages with the **same name**,
+`libero`, so they cannot share an environment:
+
+| | base | LIBERO-Plus |
+|---|---|---|
+| Setup | `setup.sh` | `setup-plus.sh` |
+| venv | `.venv` | `.venv-plus` |
+| Config | `~/.libero` | `~/.libero-plus` (via `LIBERO_CONFIG_PATH`) |
+| Assets | in repo | 6.4 GB download, 9.4 GB on disk |
+
+Not committed: `.venv/` (1.8 GB), `.venv-plus/`, `datasets/` (94 GB),
+`LIBERO-plus/libero/libero/assets/` (9.4 GB), `demonstration_data/`.
 
 A submodule tracks only an upstream commit, so **local edits must live in
 `patches/`** — otherwise a `--recursive` clone gets unpatched source.
@@ -79,6 +90,7 @@ All still present upstream. Check here first when something breaks.
 | `teleop.py` | no | Manual control, nothing recorded. Defaults to `libero_goal` 5 -- push the plate, the easiest task: one `On` condition, no grasping |
 | `replay_demo.py` | yes | `--gui` for a live window, otherwise mp4. `--mode states\|actions` |
 | `download_datasets.py` | -- | Names each suite, so `libero_90` is not skipped |
+| `plus_demo.py` | no | LIBERO-Plus only. Needs `.venv-plus` and `LIBERO_CONFIG_PATH` |
 
 `ControlEnv` accepts `has_renderer=True` but is not re-exported by
 `libero/libero/envs/__init__.py` -- import it from `env_wrapper` directly.
@@ -87,6 +99,23 @@ All still present upstream. Check here first when something breaks.
 `teleop.py` wraps the env in `VisualizationWrapper` so gripper site markers show,
 matching `scripts/collect_demonstration.py`. The unwrapped env is kept as `raw`
 for `sim`, `robots[0]` and `_check_success()`.
+
+## LIBERO-Plus
+
+10,030 tasks = 4 suites x 7 perturbation dimensions x 5 difficulty levels.
+Counts verified locally: spatial 2402, object 2518, goal 2591, `libero_10` 2519.
+
+- `libero/libero/benchmark/task_classification.json` maps every task name to its
+  `category` and `difficulty_level`. That file is the whole diagnostic value
+- 121 `libero_goal` tasks have `difficulty_level: null`. Filter for it
+- Assets are **not** in the repo. The HuggingFace `assets.zip` carries the
+  uploader's absolute path (`inspire/hdd/.../LIBERO-plus-0/assets/...`), so a
+  plain `extractall` puts them in the wrong place. `setup-plus.sh` strips it
+- `env_wrapper.py` imports `wand` at module level -> ImageMagick is required to
+  import `libero` at all, not just to apply sensor noise
+- Same `torch.load` bug as the base repo, inherited by the fork
+  (`patches/libero-plus-fixes.patch`)
+- No LICENSE file in the fork. See `patches/NOTICE.md`
 
 ## Conventions
 

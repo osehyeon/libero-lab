@@ -1,10 +1,12 @@
-# python env (1.8 GB)
+# python env (1.8 GB each)
 .venv/
+.venv-plus/
 __pycache__/
 *.pyc
 
 # datasets (94 GB) and collection output
 datasets/
+datasets-plus/
 demonstration_data/
 
 # run output
