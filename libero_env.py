@@ -55,4 +55,12 @@ def require(flavor):
     if same_python and env == os.environ:
         return                                  # already correct, carry on
 
+    # a re-exec that does not satisfy the check above would spin forever, so
+    # only ever do it once
+    if os.environ.get("LIBERO_ENV_REEXEC") == flavor:
+        raise SystemExit(
+            f"re-exec into {venv.name} did not take. run it directly:\n"
+            f"  LIBERO_CONFIG_PATH={config} {python} {' '.join(sys.argv)}")
+    env["LIBERO_ENV_REEXEC"] = flavor
+
     os.execve(str(python), [str(python), *sys.argv], env)
