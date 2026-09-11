@@ -138,6 +138,18 @@ Counts verified locally: spatial 2402, object 2518, goal 2591, `libero_10` 2519.
   camera `robot0_eye_in_hand` is never noised. Render after one hold-still
   `step()` to see what a policy sees. Noise id `M`: 1-10 motion blur, 11-20
   gaussian, 21-30 zoom, 31-40 fog, 41-50 glass; severity `(M-1)%10+1`
+- **`task.language` leaks the perturbation id into the prompt** for all 8,493
+  non-language tasks (84.7% of 10,030): it is built from the file name, so a
+  camera task reads `...on the plate view 0 0 100 2 352 initstate 0`. Extra words:
+  background/light 2, objects 2-3, camera/robot 8, noise 10. Language tasks are
+  clean -- they get the paraphrase. Upstream issues #64/#65 measured +6.5 to +8.08
+  pp on the camera axis once fixed. When wiring a policy, pass
+  `env.language_instruction` (read from the bddl), not `task.language`
+- **macOS renders some Light presets as an all-zero frame**, both cameras. 12 of
+  a 40-task sample (L1 2/8 ... L5 5/8). Not a dark scene: switching the two scene
+  spotlights off brings the frame back (0 -> 73 mean) and the XMLs differ only in
+  light `dir`. Leaderboard OpenVLA-OFT scores 88.7% on Light, so the authors' Linux
+  renders were fine. Do not evaluate the Light axis on macOS. Linux check pending
 - `--plus` has to be read off `sys.argv` before any `libero` import, since it
   decides which venv to re-exec into. argparse runs far too late
 - Forget `LIBERO_CONFIG_PATH` and `.venv-plus` silently reads `~/.libero`, then

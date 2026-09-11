@@ -29,9 +29,12 @@ robosuite scene.
 | File | |
 |---|---|
 | `libero-plus.html` | The 7 perturbation axes shown on one task, the counts, and the setup traps |
+| `libero-plus-tasks.html` | Gallery: one task across all 7 axes x 5 levels, plus the 4 suites. What each level measures, the name grammar, known defects |
 | `libero-successors.md` | LIBERO-PRO, Plus, X and Para compared -- what each adds and which to pick |
 
 ## Notes
 
-Text is in Korean. Every number was measured against this repo except in
-`libero-successors.md`, which is a literature summary and says so.
+Text is in Korean. Every number was measured against this repo, with two
+exceptions that say so where they appear: `libero-successors.md` is a literature
+summary, and `libero-plus-tasks.html` quotes success rates reported in upstream
+issues #61, #64 and #65.

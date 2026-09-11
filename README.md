@@ -141,6 +141,13 @@ on macOS and warns on Linux, where it needs root.
 
 [docs/libero-plus/libero-plus.html](docs/libero-plus/libero-plus.html) shows all
 7 perturbations rendered on one task, with the counts and the setup traps.
+[libero-plus-tasks.html](docs/libero-plus/libero-plus-tasks.html) lays one task
+out across all 7 axes x 5 levels and measures what a level actually means.
+
+Two things to know before evaluating. `task.language` carries the perturbation
+id for 84.7% of tasks (`...on the plate view 0 0 100 2 352 initstate 0`); pass the
+policy `env.language_instruction` instead. And macOS renders some Light presets
+as an all-black frame, so do not evaluate the Light axis on a Mac.
 [libero-successors.md](docs/libero-plus/libero-successors.md) compares this
 benchmark against LIBERO-PRO, LIBERO-X and LIBERO-Para.
 
