@@ -140,6 +140,30 @@ Counts verified locally: spatial 2402, object 2518, goal 2591, `libero_10` 2519.
   this **before** importing `benchmark` -- LIBERO-plus scans every bddl file at
   import time, so a later check never runs
 
+## Why both submodules stay
+
+LIBERO-plus declares no dependency on LIBERO (`install_requires=[]`) and imports
+nothing from it -- it is a self-contained fork. On disk it is a strict superset:
+every original `.bddl` (11 per suite) and every original `.pruned_init` (20, 10,
+20, 20, 180) is present. `libero_90` there is registered with the 90 original
+task names, unperturbed.
+
+So one environment could in principle do everything. Two things argue against:
+
+- **The 4 perturbed suites register no unperturbed task.** `libero_spatial` task
+  0 is `..._table_1`, already a texture swap; a plain task name matches nothing.
+  You can still build one by handing `ControlEnv` an original bddl path and
+  `torch.load`-ing the original `.pruned_init` -- verified working -- but the
+  benchmark object will not hand it to you
+- **The same scene does not render identically.** Camera pose, fovy, `nbody` and
+  `ngeom` all match exactly, yet 3.2% of pixels differ by more than 20, and the
+  difference sits on the objects (mean 6.75) not the wall (0.79). The fork ships
+  its own re-exported object assets. Published baselines were measured on the
+  original renderer, so keep it for the reference numbers
+
+Net: base is the reference, plus is the probe. Dropping base saves 1.7 GB of
+venv and gives up the apples-to-apples comparison the whole exercise rests on.
+
 ## Conventions
 
 - Commit messages: one line, English, no body, no trailers
