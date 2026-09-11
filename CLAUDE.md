@@ -145,11 +145,13 @@ Counts verified locally: spatial 2402, object 2518, goal 2591, `libero_10` 2519.
   clean -- they get the paraphrase. Upstream issues #64/#65 measured +6.5 to +8.08
   pp on the camera axis once fixed. When wiring a policy, pass
   `env.language_instruction` (read from the bddl), not `task.language`
-- **macOS renders some Light presets as an all-zero frame**, both cameras. 12 of
-  a 40-task sample (L1 2/8 ... L5 5/8). Not a dark scene: switching the two scene
-  spotlights off brings the frame back (0 -> 73 mean) and the XMLs differ only in
-  light `dir`. Leaderboard OpenVLA-OFT scores 88.7% on Light, so the authors' Linux
-  renders were fine. Do not evaluate the Light axis on macOS. Linux check pending
+- **macOS renders the Light axis wrong.** Same 40-task sample: 12 all-zero frames
+  on macOS (both cameras), 0 on Linux (Mesa OSMesa in Docker). Frames that are not
+  black can still be wrong -- preset 333 loses a sharp-edged wedge (mean 84 vs 127
+  on Linux). Switching the scene spotlights off, or cutoff 180, brings the frame
+  back; the XMLs differ only in light `dir`. Likely cause (unproven): fixed-function
+  GL spotlights through Apple's GL-on-Metal layer go NaN behind the light. Never
+  evaluate or screenshot the Light axis on a Mac; use `docker/` (11.8 GB image)
 - `--plus` has to be read off `sys.argv` before any `libero` import, since it
   decides which venv to re-exec into. argparse runs far too late
 - Forget `LIBERO_CONFIG_PATH` and `.venv-plus` silently reads `~/.libero`, then

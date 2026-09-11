@@ -38,6 +38,7 @@ variable to remember -- see `libero_env.py`.
 | `download_datasets.py` | Fetch the 94 GB demo datasets |
 | `plus_demo.py` | Browse and render LIBERO-Plus perturbations |
 | `libero_env.py` | Sends each script to the right venv and config |
+| `docker/` | Linux render box for LIBERO-Plus, since macOS draws its lighting wrong |
 | `docs/` | Write-ups, split into `sim/`, `libero/` and `libero-plus/` |
 | `CLAUDE.md` | Working notes — bug list, measured facts, next steps |
 
@@ -146,8 +147,9 @@ out across all 7 axes x 5 levels and measures what a level actually means.
 
 Two things to know before evaluating. `task.language` carries the perturbation
 id for 84.7% of tasks (`...on the plate view 0 0 100 2 352 initstate 0`); pass the
-policy `env.language_instruction` instead. And macOS renders some Light presets
-as an all-black frame, so do not evaluate the Light axis on a Mac.
+policy `env.language_instruction` instead. And macOS draws the Light axis wrong
+-- all black or partly black -- so evaluate it on Linux. `docker/` holds a Linux
+render box that works on a Mac (Mesa, CPU; the image is 11.8 GB).
 [libero-successors.md](docs/libero-plus/libero-successors.md) compares this
 benchmark against LIBERO-PRO, LIBERO-X and LIBERO-Para.
 
