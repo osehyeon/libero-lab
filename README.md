@@ -38,7 +38,7 @@ variable to remember -- see `libero_env.py`.
 | `download_datasets.py` | Fetch the 94 GB demo datasets |
 | `plus_demo.py` | Browse and render LIBERO-Plus perturbations |
 | `libero_env.py` | Sends each script to the right venv and config |
-| `docs/` | HTML write-ups on task structure, MuJoCo I/O, rotations, VLA practice |
+| `docs/` | Write-ups, split into `sim/`, `libero/` and `libero-plus/` |
 | `CLAUDE.md` | Working notes — bug list, measured facts, next steps |
 
 ## Drive it yourself
@@ -126,8 +126,10 @@ module level, so `import libero` fails without it. `brew install imagemagick`
 on macOS, `apt install libmagickwand-dev` on Linux. `setup-plus.sh` installs it
 on macOS and warns on Linux, where it needs root.
 
-A survey of LIBERO-Plus and the other successor benchmarks is in
-[docs/libero-successors.md](docs/libero-successors.md).
+[docs/libero-plus/libero-plus.html](docs/libero-plus/libero-plus.html) shows all
+7 perturbations rendered on one task, with the counts and the setup traps.
+[libero-successors.md](docs/libero-plus/libero-successors.md) compares this
+benchmark against LIBERO-PRO, LIBERO-X and LIBERO-Para.
 
 ## Watch the ground truth
 

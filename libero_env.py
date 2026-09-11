@@ -44,6 +44,12 @@ def require(flavor):
     if not (config / "config.yaml").exists():
         raise SystemExit(f"{config}/config.yaml is missing. run ./{setup}")
 
+    if sys.argv[0] in ("", "-", "-c"):
+        raise SystemExit(
+            "cannot re-exec a script read from stdin or -c: the source is gone\n"
+            f"write it to a file, or run it directly:\n"
+            f"  LIBERO_CONFIG_PATH={config} {python} ...")
+
     env = dict(os.environ)
     env["LIBERO_CONFIG_PATH"] = str(config)
     if flavor == "plus" and "MAGICK_HOME" not in env:
