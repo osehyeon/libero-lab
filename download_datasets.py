@@ -12,6 +12,9 @@ Upstream's own downloader takes `--datasets all`, which looks for a
 `libero_100` directory that does not exist on HuggingFace. It fails silently,
 so libero_90 never arrives. Naming each suite avoids that.
 """
+import libero_env
+libero_env.require("base")      # re-execs under .venv if needed
+
 import argparse
 import os
 
