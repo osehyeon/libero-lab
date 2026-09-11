@@ -97,7 +97,7 @@ for `sim`, `robots[0]` and `_check_success()`.
 
 ## Next
 
-- [ ] Use `libero_90` as a held-out eval. Released models score 18%, so headroom is visible. Needs only the 90 `.pruned_init` files (8.8 MB)
+- [ ] Try `LIBERO-Plus` (CVPR 2026) as the held-out eval instead of `libero_90`. It pins robosuite 1.4.0 / bddl 1.0.1, close enough to this repo, and ships finetuned OpenVLA-OFT+ weights so a run needs no training. See `docs/libero-successors.md`
 - [ ] Replay all 50 demos in `actions` mode to measure reproduction failure rate across versions
 - [ ] Wire up a VLA model — 32 GB is enough for 7B inference. Replace the random action at `run_demo.py:52`
 - [ ] Diff `openvla/modified_libero_rlds` against the original to pin down the `no_noops` rule (only described in the paper appendix)

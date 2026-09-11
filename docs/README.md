@@ -12,5 +12,7 @@ Every number in them was measured against this repo, not copied from papers.
 | `rotation.html` | Why position is 7 slots and velocity 6 — quaternions, angular velocity, gimbal lock |
 | `rot-playground.html` | Interactive. Drag a Unity-style gizmo and watch the quaternion change |
 | `vla-libero.html` | What released VLA checkpoints actually train and evaluate on |
+| `libero-successors.md` | Benchmarks built on top of LIBERO: PRO, Plus, X, Para -- what each adds and which to pick |
 
-Text is in Korean.
+Text is in Korean. Numbers in `libero-successors.md` come from the papers, not
+from this repo -- it is a literature summary, not a measurement.
