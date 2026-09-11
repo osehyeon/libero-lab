@@ -20,14 +20,15 @@ fi
 uv venv --python 3.10 .venv-plus
 
 echo "[3/5] Dependencies"
+# Versions come from constraints.txt, frozen from a working install.
 # Same stack as setup.sh. Upstream asks for robosuite 1.4.0 and numpy 1.22.4;
 # 1.4.1 and numpy<2 work and are what the base env already proved out.
-uv pip install --python .venv-plus/bin/python \
+uv pip install --python .venv-plus/bin/python -c "$ROOT/constraints.txt" \
     "numpy<2" "robosuite==1.4.1" "mujoco==2.3.7" "bddl==1.0.1" \
     easydict "hydra-core==1.2.0" opencv-python "gym==0.25.2" \
     matplotlib cloudpickle future einops thop termcolor "imageio[ffmpeg]" \
     huggingface_hub h5py tqdm psutil pillow scikit-image "usd-core>=25.5" wand
-uv pip install --python .venv-plus/bin/python --no-deps "robomimic==0.3.0"
+uv pip install --python .venv-plus/bin/python -c "$ROOT/constraints.txt" --no-deps "robomimic==0.3.0"
 
 # `wand` binds to ImageMagick at import time and env_wrapper.py imports it at
 # module level, so evaluation does not start without it.

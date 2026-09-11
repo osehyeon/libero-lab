@@ -4,7 +4,7 @@ macOS draws the Light axis wrong (see CLAUDE.md), so gallery images of it are
 made here instead. Mount the repo at its own absolute path so the paths in
 ~/.libero-plus/config.yaml resolve inside the container.
 
-  docker build -t libero-plus-render docker/
+  docker build -t libero-plus-render -f docker/Dockerfile .
   docker run --rm -v "$PWD:$PWD" -v ~/.libero-plus:/root/.libero-plus:ro \
       -e LIBERO_CONFIG_PATH=/root/.libero-plus libero-plus-render \
       python "$PWD/docker/render_one.py" libero_goal 2552 320 "$PWD/runs/out.jpg"

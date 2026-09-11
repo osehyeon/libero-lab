@@ -18,14 +18,15 @@ fi
 uv venv --python 3.10 .venv
 
 echo "[3/5] Dependencies"
+# Versions come from constraints.txt, frozen from a working install.
 # LIBERO declares install_requires=[], so nothing is pulled in. List it all here.
-uv pip install --python .venv/bin/python \
+uv pip install --python .venv/bin/python -c "$ROOT/constraints.txt" \
     "numpy<2" "robosuite==1.4.1" "mujoco==2.3.7" "bddl==1.0.1" \
     easydict "hydra-core==1.2.0" opencv-python "gym==0.25.2" \
     matplotlib cloudpickle future einops thop termcolor "imageio[ffmpeg]" \
     huggingface_hub h5py tqdm psutil pillow
 # egl_probe is Linux-only and fails to build on macOS
-uv pip install --python .venv/bin/python --no-deps "robomimic==0.3.0"
+uv pip install --python .venv/bin/python -c "$ROOT/constraints.txt" --no-deps "robomimic==0.3.0"
 
 echo "[4/5] Patches"
 # libero is a namespace package that find_packages() misses; inject the path

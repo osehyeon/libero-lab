@@ -31,6 +31,7 @@ variable to remember -- see `libero_env.py`.
 |---|---|
 | `setup.sh` | Base environment, including 8 upstream workarounds |
 | `setup-plus.sh` | LIBERO-Plus environment — separate venv, same package name |
+| `constraints.txt` | Exact version of every dependency, so a fresh clone matches a working install |
 | `patches/` | Source fixes — a submodule cannot carry local edits |
 | `run_demo.py` | List tasks, run with GUI, save video |
 | `teleop.py` | Drive a task by hand, nothing recorded |

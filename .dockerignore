@@ -1,0 +1,5 @@
+# docker/Dockerfile builds from the repo root so it can read constraints.txt.
+# Send only that and docker/; the LIBERO-plus assets alone are 9.4 GB.
+*
+!constraints.txt
+!docker/

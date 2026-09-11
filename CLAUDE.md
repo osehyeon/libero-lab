@@ -151,7 +151,8 @@ Counts verified locally: spatial 2402, object 2518, goal 2591, `libero_10` 2519.
   on Linux). Switching the scene spotlights off, or cutoff 180, brings the frame
   back; the XMLs differ only in light `dir`. Likely cause (unproven): fixed-function
   GL spotlights through Apple's GL-on-Metal layer go NaN behind the light. Never
-  evaluate or screenshot the Light axis on a Mac; use `docker/` (11.8 GB image)
+  evaluate or screenshot the Light axis on a Mac; use `docker/` (11.8 GB image,
+  build from the root: `docker build -t libero-plus-render -f docker/Dockerfile .`)
 - `--plus` has to be read off `sys.argv` before any `libero` import, since it
   decides which venv to re-exec into. argparse runs far too late
 - Forget `LIBERO_CONFIG_PATH` and `.venv-plus` silently reads `~/.libero`, then
@@ -189,6 +190,10 @@ venv and gives up the apples-to-apples comparison the whole exercise rests on.
 - Don't guess numbers. Every value here was measured; keep it that way
 - Web search summaries have contradicted raw files. Read the source
 - Local LIBERO edits go in `patches/`, applied by `setup.sh`
+- Third-party versions live in `constraints.txt`, frozen from the two working
+  venvs. `setup.sh`, `setup-plus.sh` and `docker/Dockerfile` all install with
+  `-c`. Change it deliberately and re-verify; unpinned drift is what broke
+  `torch.load` (torch 2.6). Linux-only packages are not in it yet
 - `docs/` splits into `sim/` (MuJoCo, applies to both), `libero/`, `libero-plus/`
 
 ## Next
