@@ -116,6 +116,10 @@ Counts verified locally: spatial 2402, object 2518, goal 2591, `libero_10` 2519.
 - Same `torch.load` bug as the base repo, inherited by the fork
   (`patches/libero-plus-fixes.patch`)
 - No LICENSE file in the fork. See `patches/NOTICE.md`
+- Forget `LIBERO_CONFIG_PATH` and `.venv-plus` silently reads `~/.libero`, then
+  looks for perturbed bddl files inside the base repo. `plus_demo.py` checks for
+  this **before** importing `benchmark` -- LIBERO-plus scans every bddl file at
+  import time, so a later check never runs
 
 ## Conventions
 
